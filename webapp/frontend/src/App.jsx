@@ -7,6 +7,7 @@ import RaceDetail from './pages/RaceDetail'
 import Registrations from './pages/Registrations'
 import Results from './pages/Results'
 import Analytics from './pages/Analytics'
+import Memberships from './pages/Memberships'
 import { supabase } from './supabaseClient'
 
 // Handle OAuth callback
@@ -71,6 +72,7 @@ function AppContent() {
             <Route path="/registrations" element={<ProtectedRoute><Registrations /></ProtectedRoute>} />
             <Route path="/results" element={<ProtectedRoute><Results /></ProtectedRoute>} />
             <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+            <Route path="/memberships" element={<ProtectedRoute><Memberships /></ProtectedRoute>} />
           </Routes>
         </main>
       </div>

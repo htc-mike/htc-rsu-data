@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import trophyImage from '../../htc.logo.new.blue.png'
-import { Users, BarChart3, Home, Trophy, LogOut, LogIn } from 'lucide-react'
+import { Users, BarChart3, Home, Trophy, LogOut, LogIn, UserCheck } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
 function Navigation() {
@@ -38,6 +38,13 @@ function Navigation() {
                 >
                   <BarChart3 className="h-5 w-5 group-hover:scale-110 transition-transform" />
                   <span className="font-medium">Analytics</span>
+                </Link>
+                <Link
+                  to="/memberships"
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg text-[#94A3B8] hover:text-white hover:bg-[#334155] transition-all duration-300 group"
+                >
+                  <UserCheck className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                  <span className="font-medium">Memberships</span>
                 </Link>
                 <div className="flex items-center space-x-3 ml-4 pl-4 border-l border-[#334155]">
                   <span className="text-slate-300 text-sm">{user.email}</span>
