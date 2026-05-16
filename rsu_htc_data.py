@@ -1,11 +1,12 @@
 import json
+import os
 import file_utils
 from postgres_db import PostgresDB
 import datetime
 from rsu_data import RSU_Data
 
-RSU_CONFIG = r'C:\projects\config\rsu_client_config.json'
-DB_CONFIG = r'C:\projects\config\db_config.json'
+RSU_CONFIG = os.environ.get('RSU_CONFIG_PATH', 'rsu_client_config.json')
+DB_CONFIG = os.environ.get('DB_CONFIG_PATH', 'db_config.json')
 
 TBL_RACES = 'htc.races'
 TBL_EVENTS = 'htc.events'
