@@ -3,13 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>Authentication Callback</title>
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script>
-    // Supabase configuration
-    const supabaseUrl = 'https://anxkcikdwqtcuetootti.supabase.co'
-    const supabaseKey = 'sb_publishable_FOkbLSM8TmVM0i9VOaGEhw_aWlj2s7h'
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey)
-
     // Handle OAuth callback
     async function handleCallback() {
       try {
@@ -18,16 +12,20 @@
         const accessToken = hashParams.get('access_token')
         const refreshToken = hashParams.get('refresh_token')
 
+        console.log('Access token found:', !!accessToken)
+
         if (accessToken) {
-          // Set the session
-          await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken
-          })
+          // Store tokens in localStorage for the React app to pick up
+          localStorage.setItem('sb-access-token', accessToken)
+          if (refreshToken) {
+            localStorage.setItem('sb-refresh-token', refreshToken)
+          }
         }
 
-        // Redirect to main app
-        window.location.href = '/htc-rsu-data/'
+        // Redirect to main app after a short delay
+        setTimeout(() => {
+          window.location.href = '/htc-rsu-data/'
+        }, 500)
       } catch (error) {
         console.error('Error handling callback:', error)
         // Redirect to main app even on error
