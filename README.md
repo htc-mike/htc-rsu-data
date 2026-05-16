@@ -211,8 +211,8 @@ Automated workflow for deploying the web application to GitHub Pages.
 5. Deploy to GitHub Pages
 
 **Configuration:**
-- Base path: `/htc-rsu-data/` for GitHub Pages subdirectory
-- OAuth callback: `/htc-rsu-data/auth/callback`
+- Custom domain: `data.hartfordtrackclub.com`
+- OAuth callback: `/auth/callback`
 
 ## Setup Instructions
 

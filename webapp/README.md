@@ -85,8 +85,8 @@ The web application uses Google OAuth via Supabase for authentication:
 2. **Local Development**:
    - Redirect URI: `http://localhost:3000/auth/callback`
 
-3. **Production (GitHub Pages)**:
-   - Redirect URI: `https://htc-mike.github.io/htc-rsu-data/auth/callback`
+3. **Production (Custom Domain)**:
+   - Redirect URI: `https://data.hartfordtrackclub.com/auth/callback`
 
 4. **OAuth Flow**:
    - Static HTML callback handler (`/auth/callback.html`) handles OAuth response
@@ -101,11 +101,11 @@ The web application is automatically deployed to GitHub Pages via GitHub Actions
 
 **Workflow**: `.github/workflows/deploy.yml`
 
-**Configuration**:
-- Base path: `/htc-rsu-data/` for GitHub Pages subdirectory
-- OAuth callback: `/htc-rsu-data/auth/callback`
+**Configuration:**
+- Custom domain: `data.hartfordtrackclub.com`
+- OAuth callback: `/auth/callback`
 
-**Deployment URL**: https://htc-mike.github.io/htc-rsu-data/
+**Deployment URL**: https://data.hartfordtrackclub.com/
 
 **Manual Deployment**:
 ```bash
@@ -161,7 +161,7 @@ webapp/
    - **Analytics**: View dashboard with charts and statistics
 
 ### Production
-1. Access the deployed application at https://htc-mike.github.io/htc-rsu-data/
+1. Access the deployed application at https://data.hartfordtrackclub.com/
 2. Sign in with Google OAuth
 3. Navigate using the top navigation bar
 
