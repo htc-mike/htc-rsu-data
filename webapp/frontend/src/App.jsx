@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, HashRouter } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Navigation from './components/Navigation'
 import Login from './components/Login'
@@ -14,11 +14,25 @@ import { useEffect } from 'react'
 
 function AuthCallback() {
   useEffect(() => {
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN') {
-        window.location.href = '/'
+    const handleAuth = async () => {
+      const { data, error } = await supabase.auth.getSession()
+      if (data.session) {
+        window.location.href = '/htc-rsu-data/'
+      } else {
+        // If no session, check URL hash for OAuth response
+        const hashParams = new URLSearchParams(window.location.hash.substring(1))
+        const accessToken = hashParams.get('access_token')
+        if (accessToken) {
+          // Exchange the access token for a session
+          await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: hashParams.get('refresh_token')
+          })
+          window.location.href = '/htc-rsu-data/'
+        }
       }
-    })
+    }
+    handleAuth()
   }, [])
 
   return <div className="min-h-screen bg-[#0F172A] flex items-center justify-center text-white">Signing in...</div>
