@@ -34,15 +34,6 @@ class PostgresDB():
                 'user': parsed.username,
                 'password': parsed.password
             }
-        # Use Supabase config if available, otherwise fall back to local
-        elif os.getenv('SUPABASE_DB_PASSWORD'):
-            db_config = {
-                'host': os.getenv('SUPABASE_DB_HOST_IPV4') or os.getenv('SUPABASE_DB_HOST'),
-                'port': os.getenv('SUPABASE_DB_PORT', 5432),
-                'database': os.getenv('SUPABASE_DB_NAME', 'postgres'),
-                'user': os.getenv('SUPABASE_DB_USER', 'postgres'),
-                'password': os.getenv('SUPABASE_DB_PASSWORD')
-            }
         else:
             db_config = {
                 'host': os.getenv('LOCAL_DB_HOST', 'localhost'),
@@ -66,18 +57,8 @@ class PostgresDB():
         if 'sslmode' not in kwargs and 'host' in kwargs:
             host = kwargs['host']
             # Add SSL for Supabase hosts
-            if 'supabase.co' in host:
+            if 'supabase.co' in host or 'pooler.supabase.com' in host:
                 kwargs['sslmode'] = 'require'
-                # Force IPv4 for GitHub Actions compatibility
-                import socket
-                try:
-                    # Get address info and filter for IPv4 only
-                    addrinfo = socket.getaddrinfo(host, None, socket.AF_INET)
-                    if addrinfo:
-                        ipv4_address = addrinfo[0][4][0]
-                        kwargs['host'] = ipv4_address
-                except (socket.gaierror, IndexError):
-                    pass  # Fall back to original host if resolution fails
 
         if kwargs is not None:
             self.conn = psycopg2.connect(**kwargs)
