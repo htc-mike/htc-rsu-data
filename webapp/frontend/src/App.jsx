@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, HashRouter } from 'react-router-dom'
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Navigation from './components/Navigation'
 import Login from './components/Login'
@@ -17,7 +17,7 @@ function AuthCallback() {
     const handleAuth = async () => {
       const { data, error } = await supabase.auth.getSession()
       if (data.session) {
-        window.location.href = '/htc-rsu-data/'
+        window.location.hash = '/'
       } else {
         // If no session, check URL hash for OAuth response
         const hashParams = new URLSearchParams(window.location.hash.substring(1))
@@ -28,7 +28,7 @@ function AuthCallback() {
             access_token: accessToken,
             refresh_token: hashParams.get('refresh_token')
           })
-          window.location.href = '/htc-rsu-data/'
+          window.location.hash = '/'
         }
       }
     }
@@ -60,7 +60,7 @@ function AppContent() {
   }
   
   return (
-    <Router basename="/htc-rsu-data">
+    <Router>
       <div className="min-h-screen bg-[#0F172A]">
         {user && <Navigation />}
         <main className="container mx-auto px-4 py-8">
