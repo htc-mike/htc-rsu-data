@@ -56,6 +56,14 @@ class PostgresDB():
             # Add SSL for Supabase hosts
             if 'supabase.co' in host:
                 kwargs['sslmode'] = 'require'
+                # Force IPv4 for GitHub Actions compatibility
+                import socket
+                try:
+                    # Resolve hostname to IPv4 address
+                    ipv4_address = socket.gethostbyname(host)
+                    kwargs['host'] = ipv4_address
+                except socket.gaierror:
+                    pass  # Fall back to original host if resolution fails
 
         if kwargs is not None:
             self.conn = psycopg2.connect(**kwargs)
