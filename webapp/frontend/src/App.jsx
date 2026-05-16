@@ -28,7 +28,7 @@ function AuthCallback() {
       }
       
       // Redirect to root after processing
-      window.location.href = '/htc-rsu-data/'
+      window.location.href = '/'
     }
     handleAuth()
   }, [])
@@ -58,7 +58,7 @@ function AppContent() {
   }
   
   return (
-    <Router basename="/htc-rsu-data">
+    <Router basename="/">
       <div className="min-h-screen bg-[#0F172A]">
         {user && <Navigation />}
         <main className="container mx-auto px-4 py-8">
