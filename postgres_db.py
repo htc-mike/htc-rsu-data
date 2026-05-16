@@ -59,10 +59,12 @@ class PostgresDB():
                 # Force IPv4 for GitHub Actions compatibility
                 import socket
                 try:
-                    # Resolve hostname to IPv4 address
-                    ipv4_address = socket.gethostbyname(host)
-                    kwargs['host'] = ipv4_address
-                except socket.gaierror:
+                    # Get address info and filter for IPv4 only
+                    addrinfo = socket.getaddrinfo(host, None, socket.AF_INET)
+                    if addrinfo:
+                        ipv4_address = addrinfo[0][4][0]
+                        kwargs['host'] = ipv4_address
+                except (socket.gaierror, IndexError):
                     pass  # Fall back to original host if resolution fails
 
         if kwargs is not None:
