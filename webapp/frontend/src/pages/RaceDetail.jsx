@@ -282,84 +282,88 @@ function RaceDetail() {
         </div>
       </div>
 
-      {finishersOverTime.length > 0 && (
-        <div className="card p-6 mb-8 animate-slide-in">
-          <h2 className="text-2xl font-bold text-white mb-4">Finishers Over Time</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={finishersChartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis 
-                dataKey="year"
-                label={{ value: 'Year', position: 'insideBottom', offset: -5, fill: '#94A3B8', style: { fill: '#94A3B8' } }}
-                stroke="#94A3B8"
-                fill="#94A3B8"
-              />
-              <YAxis 
-                label={{ value: 'Finishers', angle: -90, position: 'insideLeft', fill: '#94A3B8', style: { fill: '#94A3B8' } }}
-                stroke="#94A3B8"
-                fill="#94A3B8"
-              />
-              <Tooltip 
-                labelFormatter={(label) => `Year ${label}`}
-                contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '8px' }}
-                itemStyle={{ color: '#F8FAFC' }}
-              />
-              <Legend />
-              <Line 
-                dataKey="count"
-                name="Finishers"
-                stroke="#3b82f6"
-                strokeWidth={3}
-                dot={{ r: 6 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      )}
+      {(finishersOverTime.length > 0 || registrationsOverTime.length > 0) && (
+        <div className="flex gap-6 mb-8 animate-slide-in">
+          {finishersOverTime.length > 0 && (
+            <div className="card p-6 flex-1">
+              <h2 className="text-2xl font-bold text-white mb-4">Finishers Over Time</h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={finishersChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                  <XAxis 
+                    dataKey="year"
+                    label={{ value: 'Year', position: 'insideBottom', offset: -5, fill: '#94A3B8', style: { fill: '#94A3B8' } }}
+                    stroke="#94A3B8"
+                    fill="#94A3B8"
+                  />
+                  <YAxis 
+                    label={{ value: 'Finishers', angle: -90, position: 'insideLeft', fill: '#94A3B8', style: { fill: '#94A3B8' } }}
+                    stroke="#94A3B8"
+                    fill="#94A3B8"
+                  />
+                  <Tooltip 
+                    labelFormatter={(label) => `Year ${label}`}
+                    contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '8px' }}
+                    itemStyle={{ color: '#F8FAFC' }}
+                  />
+                  <Legend />
+                  <Line 
+                    dataKey="count"
+                    name="Finishers"
+                    stroke="#3b82f6"
+                    strokeWidth={3}
+                    dot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
 
-      {registrationsOverTime.length > 0 && (
-        <div className="card p-6 mb-8 animate-slide-in">
-          <h2 className="text-2xl font-bold text-white mb-4">Registrations Over Time</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis 
-                dataKey="week"
-                label={{ value: 'Week', position: 'insideBottom', offset: -5, fill: '#94A3B8', style: { fill: '#94A3B8' } }}
-                stroke="#94A3B8"
-                fill="#94A3B8"
-              />
-              <YAxis 
-                label={{ value: 'Registrations', angle: -90, position: 'insideLeft', fill: '#94A3B8', style: { fill: '#94A3B8' } }}
-                stroke="#94A3B8"
-                fill="#94A3B8"
-              />
-              <Tooltip 
-                labelFormatter={(label) => `${label}`}
-                contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '8px' }}
-                itemStyle={{ color: '#F8FAFC' }}
-              />
-              <Legend />
-              {years.map((year, index) => (
-                <Line 
-                  key={year}
-                  dataKey={`year_${year}`}
-                  name={`Year ${year}`}
-                  stroke={colors[index % colors.length]}
-                  strokeWidth={2}
-                  dot={{ r: 4 }}
-                />
-              ))}
-              <Line 
-                dataKey="median"
-                name="Median"
-                stroke="#F97316"
-                strokeWidth={3}
-                strokeDasharray="5 5"
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          {registrationsOverTime.length > 0 && (
+            <div className="card p-6 flex-1">
+              <h2 className="text-2xl font-bold text-white mb-4">Registrations Over Time</h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                  <XAxis 
+                    dataKey="week"
+                    label={{ value: 'Week', position: 'insideBottom', offset: -5, fill: '#94A3B8', style: { fill: '#94A3B8' } }}
+                    stroke="#94A3B8"
+                    fill="#94A3B8"
+                  />
+                  <YAxis 
+                    label={{ value: 'Registrations', angle: -90, position: 'insideLeft', fill: '#94A3B8', style: { fill: '#94A3B8' } }}
+                    stroke="#94A3B8"
+                    fill="#94A3B8"
+                  />
+                  <Tooltip 
+                    labelFormatter={(label) => `${label}`}
+                    contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '8px' }}
+                    itemStyle={{ color: '#F8FAFC' }}
+                  />
+                  <Legend />
+                  {years.map((year, index) => (
+                    <Line 
+                      key={year}
+                      dataKey={`year_${year}`}
+                      name={`Year ${year}`}
+                      stroke={colors[index % colors.length]}
+                      strokeWidth={2}
+                      dot={{ r: 4 }}
+                    />
+                  ))}
+                  <Line 
+                    dataKey="median"
+                    name="Median"
+                    stroke="#F97316"
+                    strokeWidth={3}
+                    strokeDasharray="5 5"
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </div>
       )}
 
