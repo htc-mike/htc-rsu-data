@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Authentication Callback</title>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    // Supabase configuration
+    const supabaseUrl = 'https://anxkcikdwqtcuetootti.supabase.co'
+    const supabaseKey = 'sb_publishable_FOkbLSM8TmVM0i9VOaGEhw_aWlj2s7h'
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey)
+
+    // Handle OAuth callback
+    async function handleCallback() {
+      try {
+        // Get access token from URL hash
+        const hashParams = new URLSearchParams(window.location.hash.substring(1))
+        const accessToken = hashParams.get('access_token')
+        const refreshToken = hashParams.get('refresh_token')
+
+        if (accessToken) {
+          // Set the session
+          await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          })
+        }
+
+        // Redirect to main app
+        window.location.href = '/htc-rsu-data/'
+      } catch (error) {
+        console.error('Error handling callback:', error)
+        // Redirect to main app even on error
+        window.location.href = '/htc-rsu-data/'
+      }
+    }
+
+    // Handle callback on load
+    window.addEventListener('load', handleCallback)
+  </script>
+</head>
+<body>
+  <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #0F172A; color: white; font-family: sans-serif;">
+    <div>Signing in...</div>
+  </div>
+</body>
+</html>
