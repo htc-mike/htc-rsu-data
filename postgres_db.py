@@ -22,8 +22,20 @@ class PostgresDB():
         else:
             load_dotenv()
         
+        # Use Supabase connection string if available (for Supavisor)
+        if os.getenv('SUPABASE_DB_URL'):
+            # Parse connection string and extract components
+            from urllib.parse import urlparse
+            parsed = urlparse(os.getenv('SUPABASE_DB_URL'))
+            db_config = {
+                'host': parsed.hostname,
+                'port': parsed.port or 5432,
+                'database': parsed.path.lstrip('/'),
+                'user': parsed.username,
+                'password': parsed.password
+            }
         # Use Supabase config if available, otherwise fall back to local
-        if os.getenv('SUPABASE_DB_PASSWORD'):
+        elif os.getenv('SUPABASE_DB_PASSWORD'):
             db_config = {
                 'host': os.getenv('SUPABASE_DB_HOST_IPV4') or os.getenv('SUPABASE_DB_HOST'),
                 'port': os.getenv('SUPABASE_DB_PORT', 5432),
