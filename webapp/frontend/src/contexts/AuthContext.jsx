@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'https://htc-mike.github.io/htc-rsu-data/auth/callback.html',
+        redirectTo: 'https://data.hartfordtrackclub.com/auth/callback.html',
         skipBrowserRedirect: false
       }
     })
