@@ -15,15 +15,9 @@ A modern web application for running club administrators to manage and analyze r
 
 ```
 ┌─────────────────┐              ┌──────────────────┐
-│   React App     │◄────────────►│  Flask Backend   │
-│  (Webapp)       │   API Calls  │  (webapp/)       │
+│   React App     │◄────────────►│   Supabase       │
+│  (Webapp)       │   Direct DB  │   PostgreSQL    │
 └─────────────────┘              └──────────────────┘
-                                          │
-                                          ▼
-                                ┌──────────────────┐
-                                │  PostgreSQL DB   │
-                                │  (htc schema)    │
-                                └──────────────────┘
 
 ┌─────────────────┐              ┌──────────────────┐
 │   React App     │◄────────────►│   Supabase Auth  │
@@ -33,12 +27,6 @@ A modern web application for running club administrators to manage and analyze r
 
 ## Tech Stack
 
-### Backend
-- Flask (Python web framework)
-- PostgreSQL database (Supabase)
-- psycopg2 for database connectivity
-- CORS for frontend-backend communication
-
 ### Frontend
 - React 18 with Vite
 - TailwindCSS for styling
@@ -46,10 +34,10 @@ A modern web application for running club administrators to manage and analyze r
 - Recharts for data visualization
 - Lucide React for icons
 - Supabase for authentication (Google OAuth)
+- Supabase client for direct database access
 
 ## Prerequisites
 
-- Python 3.8+
 - Node.js 18+
 - PostgreSQL database (Supabase recommended)
 - Supabase project with Google OAuth configured
@@ -57,34 +45,7 @@ A modern web application for running club administrators to manage and analyze r
 
 ## Setup Instructions
 
-### 1. Backend Setup
-
-Navigate to the backend directory:
-
-```bash
-cd webapp/backend
-```
-
-Install Python dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Configure environment variables:
-```env
-SUPABASE_DB_URL=postgresql://postgres.YOUR_PROJECT_ID:YOUR_PASSWORD@aws-0-YOUR-REGION.pooler.supabase.com:6543/postgres
-```
-
-Start the Flask API server:
-
-```bash
-python app.py
-```
-
-The backend API will run on `http://localhost:5000`
-
-### 2. Frontend Setup
+### Frontend Setup
 
 Navigate to the frontend directory:
 
@@ -111,25 +72,6 @@ npm run dev
 ```
 
 The frontend will run on `http://localhost:3000`
-
-## API Endpoints
-
-### Races
-- `GET /api/races` - Get all races
-- `GET /api/races/:race_id` - Get specific race details
-- `GET /api/races/:race_id/events` - Get events for a race
-
-### Registrations
-- `GET /api/registrations` - Get all registrations
-- `GET /api/events/:event_id/registrations` - Get registrations for a specific event
-
-### Analytics
-- `GET /api/analytics/summary` - Get overall summary statistics
-- `GET /api/analytics/race-revenue` - Get revenue data by race
-- `GET /api/analytics/registrations-over-time` - Get registration trends over time
-
-### Donations
-- `GET /api/donations` - Get recent donations
 
 ## Authentication
 
@@ -173,30 +115,10 @@ npm run build
 
 The built files in `dist/` can be manually deployed to any static hosting service.
 
-## Database Configuration
-
-The backend uses environment variables for database configuration:
-
-```env
-SUPABASE_DB_URL=postgresql://postgres.YOUR_PROJECT_ID:YOUR_PASSWORD@aws-0-YOUR-REGION.pooler.supabase.com:6543/postgres
-```
-
-For local development without Supabase, you can use individual variables:
-```env
-LOCAL_DB_HOST=localhost
-LOCAL_DB_PORT=5432
-LOCAL_DB_NAME=htc
-LOCAL_DB_USER=postgres
-LOCAL_DB_PASSWORD=your_password
-```
-
 ## Project Structure
 
 ```
 webapp/
-├── backend/
-│   ├── app.py              # Flask API server
-│   └── requirements.txt    # Python dependencies
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
@@ -226,11 +148,14 @@ webapp/
 ## Usage
 
 ### Local Development
-1. Start the backend server (terminal 1)
-2. Start the frontend development server (terminal 2)
-3. Open `http://localhost:3000` in your browser
-4. Sign in with Google OAuth
-5. Navigate using the top navigation bar:
+1. Start the frontend development server:
+   ```bash
+   cd webapp/frontend
+   npm run dev
+   ```
+2. Open `http://localhost:3000` in your browser
+3. Sign in with Google OAuth
+4. Navigate using the top navigation bar:
    - **Races**: View and browse all races
    - **Registrations**: Search and view all registrations
    - **Analytics**: View dashboard with charts and statistics
@@ -273,10 +198,10 @@ The database schema (`htc` schema) is shared between both components.
 - Check that the callback HTML file is deployed to the correct path
 - Verify localStorage is accessible in your browser
 
-### API Connection Issues
-- Verify backend is running on `http://localhost:5000`
-- Check CORS configuration in Flask backend
-- Ensure database connection string is correct
+### Database Connection Issues
+- Ensure Supabase credentials are correctly configured in `.env`
+- Check that Supabase project is active and accessible
+- Verify Supabase client configuration in `supabaseClient.js`
 
 ### GitHub Pages Issues
 - Verify base path in `vite.config.js` matches repository name
@@ -285,8 +210,7 @@ The database schema (`htc` schema) is shared between both components.
 
 ## Notes
 
-- The frontend uses a proxy in development to forward API requests to the backend
 - OAuth callback uses a static HTML file to handle the redirect on GitHub Pages
-- The application uses Supabase for authentication, but direct database access for data
+- The application uses Supabase for authentication and direct database access
 - TailwindCSS lint warnings are expected until dependencies are installed
-- CORS is enabled in Flask to allow cross-origin requests between frontend and backend
+- The frontend connects directly to Supabase for both authentication and data

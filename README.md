@@ -13,7 +13,7 @@ This project synchronizes race event data from RunSignUp's API to a PostgreSQL d
 
 The system consists of:
 - **Data Sync Engine**: Automated synchronization via GitHub Actions
-- **Web Application**: React frontend with Flask backend for data visualization and management
+- **Web Application**: React frontend with direct Supabase database access for data visualization and management
 
 The data sync is designed to run automatically on a schedule (daily at 6:00 and 18:00 UTC) via GitHub Actions, with manual trigger capability.
 
@@ -43,15 +43,9 @@ The data sync is designed to run automatically on a schedule (daily at 6:00 and 
                                 └──────────────────┘
 
 ┌─────────────────┐              ┌──────────────────┐
-│   React App     │◄────────────►│  Flask Backend   │
-│  (Webapp)       │   API Calls  │  (webapp/)       │
+│   React App     │◄────────────►│   Supabase       │
+│  (Webapp)       │   Direct DB  │   PostgreSQL    │
 └─────────────────┘              └──────────────────┘
-                                          │
-                                          ▼
-                                ┌──────────────────┐
-                                │  PostgreSQL DB   │
-                                │  (Data Display)  │
-                                └──────────────────┘
 ```
 
 ## Components
@@ -130,28 +124,8 @@ Data synchronization orchestration layer.
 
 ### Web Application
 
-#### `webapp/backend/app.py`
-Flask API server for the web application.
-
-**Key Features:**
-- RESTful API endpoints for race data
-- Database queries for data retrieval
-- CORS support for frontend integration
-- Analytics endpoints for dashboard
-
-**API Endpoints:**
-- `GET /api/races` - Get all races
-- `GET /api/races/:race_id` - Get specific race details
-- `GET /api/races/:race_id/events` - Get events for a race
-- `GET /api/registrations` - Get all registrations
-- `GET /api/events/:event_id/registrations` - Get registrations for a specific event
-- `GET /api/analytics/summary` - Get overall summary statistics
-- `GET /api/analytics/race-revenue` - Get revenue data by race
-- `GET /api/analytics/registrations-over-time` - Get registration trends
-- `GET /api/donations` - Get recent donations
-
 #### `webapp/frontend/`
-React application for data visualization and management.
+React application for data visualization and management with direct Supabase database access.
 
 **Key Components:**
 - `App.jsx` - Main application with routing
@@ -168,6 +142,7 @@ React application for data visualization and management.
 - Recharts for data visualization
 - Lucide React for icons
 - Supabase for authentication (Google OAuth)
+- Supabase client for direct database access
 
 ### Database Schema
 
@@ -283,15 +258,7 @@ Automated workflow for deploying the web application to GitHub Pages.
 
 #### Web Application Setup
 
-1. **Backend setup:**
-   ```bash
-   cd webapp/backend
-   pip install -r requirements.txt
-   python app.py
-   ```
-   The backend will run on `http://localhost:5000`
-
-2. **Frontend setup:**
+1. **Frontend setup:**
    ```bash
    cd webapp/frontend
    npm install
@@ -299,7 +266,7 @@ Automated workflow for deploying the web application to GitHub Pages.
    ```
    The frontend will run on `http://localhost:3000`
 
-3. **Configure frontend environment:**
+2. **Configure frontend environment:**
    Create `webapp/frontend/.env`:
    ```env
    VITE_SUPABASE_URL=your_supabase_url
