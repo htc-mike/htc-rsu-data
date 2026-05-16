@@ -3,14 +3,15 @@ from rsu_oauth2 import RunSignUpOAuth2
 
 class RSU():
 
-    def __init__(self, oauth: RunSignUpOAuth2 = None, config_path: str = "client_config.json"):
+    def __init__(self, oauth: RunSignUpOAuth2 = None, config_path: str = "client_config.json", db=None):
         """
         Args:
             oauth:       A RunSignUpOAuth2 instance. When omitted one is created
                          automatically from *config_path*.
             config_path: Path to client_config.json (used only when *oauth* is None).
+            db:          PostgresDB instance for database-based config storage.
         """
-        self.oauth = oauth or RunSignUpOAuth2(config_path=config_path)
+        self.oauth = oauth or RunSignUpOAuth2(config_path=config_path, db=db)
         self.base_url = "https://runsignup.com"
     
 

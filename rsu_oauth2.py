@@ -63,15 +63,17 @@ class RunSignUpOAuth2:
     _TEST_TOKEN_URL = "https://test.runsignup.com/rest/v2/auth/auth-code-redemption.json"
     _TEST_REFRESH_URL = "https://test.runsignup.com/rest/v2/auth/refresh-token.json"
 
-    def __init__(self, config_path: str = "client_config.json"):
+    def __init__(self, config_path: str = "client_config.json", db=None):
         """
-        Initialize the OAuth2 handler, loading configuration from *config_path*.
+        Initialize the OAuth2 handler, loading configuration from *config_path* or database.
 
         Args:
             config_path: Path to the JSON config file that contains client
-                         credentials and (optionally) stored tokens.
+                         credentials and (optionally) stored tokens. Ignored if db is provided.
+            db: PostgresDB instance. If provided, config is loaded from htc.config table.
         """
         self.config_path = config_path
+        self.db = db
         self._pkce_verifier: Optional[str] = None
         self._load_config()
 
@@ -80,9 +82,26 @@ class RunSignUpOAuth2:
     # ------------------------------------------------------------------
 
     def _load_config(self) -> None:
-        """Load settings and any previously stored tokens from the config file."""
-        with open(self.config_path, "r", encoding="utf-8") as fh:
-            config: dict = json.load(fh)
+        """Load settings and any previously stored tokens from the config file or database."""
+        if self.db:
+            # Load from database
+            config = {}
+            sql = "SELECT key, value FROM htc.config WHERE system = 'rsu'"
+            rows, columns = self.db.select(sql)
+            for row in rows:
+                config[row[0]] = row[1]
+            
+            # Convert string values back to appropriate types
+            if 'use_pkce' in config:
+                config['use_pkce'] = config['use_pkce'].lower() in ('true', '1', 'yes')
+            if 'use_test_env' in config:
+                config['use_test_env'] = config['use_test_env'].lower() in ('true', '1', 'yes')
+            if 'token_expires_at' in config:
+                config['token_expires_at'] = float(config['token_expires_at'])
+        else:
+            # Load from file
+            with open(self.config_path, "r", encoding="utf-8") as fh:
+                config: dict = json.load(fh)
 
         self.client_id: str = config["client_id"]
         self.client_secret: str = config["client_secret"]
@@ -107,17 +126,48 @@ class RunSignUpOAuth2:
         self.token_expires_at: float = float(config.get("token_expires_at", 0))
 
     def _save_config(self) -> None:
-        """Persist the current token state back to the config file."""
-        with open(self.config_path, "r", encoding="utf-8") as fh:
-            config: dict = json.load(fh)
+        """Persist the current token state back to the config file or database."""
+        if self.db:
+            # Save to database
+            sql = f"""
+                UPDATE htc.config 
+                SET value = '{self.access_token}' 
+                WHERE system = 'rsu' AND key = 'access_token'
+            """
+            self.db.execute(sql)
+            
+            sql = f"""
+                UPDATE htc.config 
+                SET value = '{self.refresh_token}' 
+                WHERE system = 'rsu' AND key = 'refresh_token'
+            """
+            self.db.execute(sql)
+            
+            sql = f"""
+                UPDATE htc.config 
+                SET value = '{self.token_type}' 
+                WHERE system = 'rsu' AND key = 'token_type'
+            """
+            self.db.execute(sql)
+            
+            sql = f"""
+                UPDATE htc.config 
+                SET value = '{self.token_expires_at}' 
+                WHERE system = 'rsu' AND key = 'token_expires_at'
+            """
+            self.db.execute(sql)
+        else:
+            # Save to file
+            with open(self.config_path, "r", encoding="utf-8") as fh:
+                config: dict = json.load(fh)
 
-        config["access_token"] = self.access_token
-        config["refresh_token"] = self.refresh_token
-        config["token_type"] = self.token_type
-        config["token_expires_at"] = self.token_expires_at
+            config["access_token"] = self.access_token
+            config["refresh_token"] = self.refresh_token
+            config["token_type"] = self.token_type
+            config["token_expires_at"] = self.token_expires_at
 
-        with open(self.config_path, "w", encoding="utf-8") as fh:
-            json.dump(config, fh, indent=4)
+            with open(self.config_path, "w", encoding="utf-8") as fh:
+                json.dump(config, fh, indent=4)
 
     # ------------------------------------------------------------------
     # PKCE helpers

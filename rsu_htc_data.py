@@ -32,7 +32,7 @@ def main():
 
     db = PostgresDB.from_env()
 
-    rsu = RSU_Data(config_path=RSU_CONFIG)
+    rsu = RSU_Data(db=db)
 
     if REFRESH_EVENTS:
         update_race_events(rsu, db, race_id = RACE_ID)

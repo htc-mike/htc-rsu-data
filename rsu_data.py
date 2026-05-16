@@ -5,8 +5,8 @@ import file_utils
 
 class RSU_Data():
 
-    def __init__(self, config_path: str = "client_config.json"):
-        self.rsu = RSU(config_path=config_path)
+    def __init__(self, config_path: str = "client_config.json", db=None):
+        self.rsu = RSU(config_path=config_path, db=db)
 
     def get_race_events(self, race_id):
         results = self.rsu.race(race_id)
