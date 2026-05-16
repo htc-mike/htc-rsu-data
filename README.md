@@ -1,6 +1,6 @@
 # RSU HTC Data Sync
 
-Automated data synchronization system for RunSignUp (RSU) race data to a PostgreSQL database, deployed via GitHub Actions.
+Automated data synchronization system for RunSignUp (RSU) race data to a PostgreSQL database, deployed via GitHub Actions, with a web application for data visualization and management.
 
 ## Overview
 
@@ -11,7 +11,11 @@ This project synchronizes race event data from RunSignUp's API to a PostgreSQL d
 - User memberships
 - Race results (optional)
 
-The system is designed to run automatically on a schedule (daily at 6:00 and 18:00 UTC) via GitHub Actions, with manual trigger capability.
+The system consists of:
+- **Data Sync Engine**: Automated synchronization via GitHub Actions
+- **Web Application**: React frontend with Flask backend for data visualization and management
+
+The data sync is designed to run automatically on a schedule (daily at 6:00 and 18:00 UTC) via GitHub Actions, with manual trigger capability.
 
 ## Architecture
 
@@ -36,6 +40,17 @@ The system is designed to run automatically on a schedule (daily at 6:00 and 18:
                                 ┌──────────────────┐
                                 │  GitHub Actions  │
                                 │   (Scheduled)    │
+                                └──────────────────┘
+
+┌─────────────────┐              ┌──────────────────┐
+│   React App     │◄────────────►│  Flask Backend   │
+│  (Webapp)       │   API Calls  │  (webapp/)       │
+└─────────────────┘              └──────────────────┘
+                                          │
+                                          ▼
+                                ┌──────────────────┐
+                                │  PostgreSQL DB   │
+                                │  (Data Display)  │
                                 └──────────────────┘
 ```
 
@@ -113,6 +128,47 @@ Data synchronization orchestration layer.
   - `get_user_members()` - Fetch user memberships
   - `get_results()` - Fetch race results
 
+### Web Application
+
+#### `webapp/backend/app.py`
+Flask API server for the web application.
+
+**Key Features:**
+- RESTful API endpoints for race data
+- Database queries for data retrieval
+- CORS support for frontend integration
+- Analytics endpoints for dashboard
+
+**API Endpoints:**
+- `GET /api/races` - Get all races
+- `GET /api/races/:race_id` - Get specific race details
+- `GET /api/races/:race_id/events` - Get events for a race
+- `GET /api/registrations` - Get all registrations
+- `GET /api/events/:event_id/registrations` - Get registrations for a specific event
+- `GET /api/analytics/summary` - Get overall summary statistics
+- `GET /api/analytics/race-revenue` - Get revenue data by race
+- `GET /api/analytics/registrations-over-time` - Get registration trends
+- `GET /api/donations` - Get recent donations
+
+#### `webapp/frontend/`
+React application for data visualization and management.
+
+**Key Components:**
+- `App.jsx` - Main application with routing
+- `Navigation.jsx` - Top navigation bar
+- `Races.jsx` - Race listing and details
+- `RaceDetail.jsx` - Individual race information
+- `Registrations.jsx` - Registration search and view
+- `Analytics.jsx` - Dashboard with charts and statistics
+
+**Tech Stack:**
+- React 18 with Vite
+- TailwindCSS for styling
+- React Router for navigation
+- Recharts for data visualization
+- Lucide React for icons
+- Supabase for authentication (Google OAuth)
+
 ### Database Schema
 
 #### `htc.config` Table
@@ -165,6 +221,24 @@ Automated workflow for scheduled data synchronization.
 **Required Secrets:**
 - `SUPABASE_DB_URL` - Supavisor connection string for Supabase database
 
+#### `.github/workflows/deploy.yml`
+Automated workflow for deploying the web application to GitHub Pages.
+
+**Triggers:**
+- Push to main branch
+- Manual trigger
+
+**Steps:**
+1. Checkout code
+2. Set up Node.js
+3. Install frontend dependencies
+4. Build frontend
+5. Deploy to GitHub Pages
+
+**Configuration:**
+- Base path: `/htc-rsu-data/` for GitHub Pages subdirectory
+- OAuth callback: `/htc-rsu-data/auth/callback`
+
 ## Setup Instructions
 
 ### Prerequisites
@@ -175,6 +249,8 @@ Automated workflow for scheduled data synchronization.
 4. GitHub account (for GitHub Actions)
 
 ### Local Setup
+
+#### Data Sync Setup
 
 1. **Clone the repository:**
    ```bash
@@ -203,6 +279,31 @@ Automated workflow for scheduled data synchronization.
 5. **Run the sync script:**
    ```bash
    python rsu_htc_data.py
+   ```
+
+#### Web Application Setup
+
+1. **Backend setup:**
+   ```bash
+   cd webapp/backend
+   pip install -r requirements.txt
+   python app.py
+   ```
+   The backend will run on `http://localhost:5000`
+
+2. **Frontend setup:**
+   ```bash
+   cd webapp/frontend
+   npm install
+   npm run dev
+   ```
+   The frontend will run on `http://localhost:3000`
+
+3. **Configure frontend environment:**
+   Create `webapp/frontend/.env`:
+   ```env
+   VITE_SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
    ```
 
 ### GitHub Actions Setup
