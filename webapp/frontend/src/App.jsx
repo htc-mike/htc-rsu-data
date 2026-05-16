@@ -1,4 +1,4 @@
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Navigation from './components/Navigation'
 import Login from './components/Login'
@@ -15,22 +15,20 @@ import { useEffect } from 'react'
 function AuthCallback() {
   useEffect(() => {
     const handleAuth = async () => {
-      const { data, error } = await supabase.auth.getSession()
-      if (data.session) {
-        window.location.hash = '/'
-      } else {
-        // If no session, check URL hash for OAuth response
-        const hashParams = new URLSearchParams(window.location.hash.substring(1))
-        const accessToken = hashParams.get('access_token')
-        if (accessToken) {
-          // Exchange the access token for a session
-          await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: hashParams.get('refresh_token')
-          })
-          window.location.hash = '/'
-        }
+      // Check URL hash for OAuth response (Supabase returns tokens in hash)
+      const hashParams = new URLSearchParams(window.location.hash.substring(1))
+      const accessToken = hashParams.get('access_token')
+      
+      if (accessToken) {
+        // Exchange the access token for a session
+        await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: hashParams.get('refresh_token')
+        })
       }
+      
+      // Redirect to root after processing
+      window.location.href = '/htc-rsu-data/'
     }
     handleAuth()
   }, [])
@@ -60,7 +58,7 @@ function AppContent() {
   }
   
   return (
-    <Router>
+    <Router basename="/htc-rsu-data">
       <div className="min-h-screen bg-[#0F172A]">
         {user && <Navigation />}
         <main className="container mx-auto px-4 py-8">
