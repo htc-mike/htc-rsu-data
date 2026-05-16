@@ -25,7 +25,7 @@ class PostgresDB():
         # Use Supabase config if available, otherwise fall back to local
         if os.getenv('SUPABASE_DB_PASSWORD'):
             db_config = {
-                'host': os.getenv('SUPABASE_DB_HOST'),
+                'host': os.getenv('SUPABASE_DB_HOST_IPV4') or os.getenv('SUPABASE_DB_HOST'),
                 'port': os.getenv('SUPABASE_DB_PORT', 5432),
                 'database': os.getenv('SUPABASE_DB_NAME', 'postgres'),
                 'user': os.getenv('SUPABASE_DB_USER', 'postgres'),
