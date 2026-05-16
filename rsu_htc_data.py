@@ -59,11 +59,11 @@ def update_race_events(rsu, db, race_id = None):
         race, events = rsu.get_race_events(row['race_id'])
         print(f"  Events: {len(events)}")
 
-        sql = f'delete from {TBL_RACES} where race_id = {row['race_id']}'
+        sql = f'delete from {TBL_RACES} where race_id = {row["race_id"]}'
         db.execute(sql)
         db.insert_dict([race], TBL_RACES)
 
-        sql = f'delete from {TBL_EVENTS} where race_id = {row['race_id']}'
+        sql = f'delete from {TBL_EVENTS} where race_id = {row["race_id"]}'
         db.execute(sql)
         db.insert_dict(events, TBL_EVENTS)
 
@@ -103,7 +103,7 @@ def update_user_registrations(rsu, db, refresh = False, race_id = None):
                 # db.execute(sql)
                 db.insert_dict(users, TBL_USERS)
 
-                sql = f'delete from {TBL_REGISTRATIONS} where race_id = {row['race_id']} and event_id = {row["event_id"]}'
+                sql = f'delete from {TBL_REGISTRATIONS} where race_id = {row["race_id"]} and event_id = {row["event_id"]}'
                 db.execute(sql)
                 db.insert_dict(registrations, TBL_REGISTRATIONS)
 
@@ -137,11 +137,11 @@ def update_user_donations(rsu, db, refresh = False, race_id = None):
 
             periods = rsu.get_donation_periods(row['race_id'])
             print(f"  Donation Periods: {len(periods)}")
-            sql = f'delete from {TBL_DONATION_PERIODS} where race_id = {row['race_id']}'
+            sql = f'delete from {TBL_DONATION_PERIODS} where race_id = {row["race_id"]}'
             db.execute(sql)
             db.insert_dict(periods, TBL_DONATION_PERIODS)
 
-            sql = f'delete from {TBL_DONATIONS} where race_id = {row['race_id']}'
+            sql = f'delete from {TBL_DONATIONS} where race_id = {row["race_id"]}'
             db.execute(sql)
 
             for period in periods:
