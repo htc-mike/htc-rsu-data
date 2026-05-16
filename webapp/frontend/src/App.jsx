@@ -46,7 +46,7 @@ function AppContent() {
   }
   
   return (
-    <Router>
+    <Router basename="/htc-rsu-data">
       <div className="min-h-screen bg-[#0F172A]">
         {user && <Navigation />}
         <main className="container mx-auto px-4 py-8">
