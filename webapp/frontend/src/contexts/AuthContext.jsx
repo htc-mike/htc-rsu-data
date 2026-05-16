@@ -26,7 +26,8 @@ export const AuthProvider = ({ children }) => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/htc-rsu-data/auth/callback`
+        redirectTo: 'https://htc-mike.github.io/htc-rsu-data/auth/callback',
+        skipBrowserRedirect: false
       }
     })
     if (error) throw error
