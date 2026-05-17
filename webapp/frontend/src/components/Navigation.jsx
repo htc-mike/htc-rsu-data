@@ -19,7 +19,7 @@ function Navigation() {
                 onMouseEnter={(e) => e.currentTarget.style.opacity = '0.2'}
                 onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}></div>
               </div>
-              <span className="text-2xl font-bold text-white">HTC Race Admin</span>
+              <span className="text-2xl font-bold text-white">HTC Data Portal</span>
             </Link>
           </div>
           <div className="flex items-center space-x-2">
@@ -33,18 +33,18 @@ function Navigation() {
                   <span className="font-medium">Races</span>
                 </Link>
                 <Link
-                  to="/analytics"
-                  className="flex items-center space-x-2 px-4 py-2 rounded-lg text-[#94A3B8] hover:text-white hover:bg-[#334155] transition-all duration-300 group"
-                >
-                  <BarChart3 className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                  <span className="font-medium">Analytics</span>
-                </Link>
-                <Link
                   to="/memberships"
                   className="flex items-center space-x-2 px-4 py-2 rounded-lg text-[#94A3B8] hover:text-white hover:bg-[#334155] transition-all duration-300 group"
                 >
                   <UserCheck className="h-5 w-5 group-hover:scale-110 transition-transform" />
                   <span className="font-medium">Memberships</span>
+                </Link>
+                <Link
+                  to="/analytics"
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg text-[#94A3B8] hover:text-white hover:bg-[#334155] transition-all duration-300 group"
+                >
+                  <BarChart3 className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                  <span className="font-medium">Analytics</span>
                 </Link>
                 <div className="flex items-center space-x-3 ml-4 pl-4 border-l border-[#334155]">
                   <span className="text-slate-300 text-sm">{user.email}</span>
