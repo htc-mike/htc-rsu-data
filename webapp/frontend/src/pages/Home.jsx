@@ -115,7 +115,7 @@ function Home() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        <Link to="/" className="card p-6 hover:scale-105 transition-transform cursor-pointer animate-fade-in" style={{ animationDelay: '0.1s' }}>
+        <Link to="/races" className="card p-6 hover:scale-105 transition-transform cursor-pointer animate-fade-in" style={{ animationDelay: '0.1s' }}>
           <div className="flex items-center justify-between mb-4">
             <Trophy className="h-8 w-8 text-blue-400" />
             <ArrowRight className="h-5 w-5 text-[#94A3B8]" />
