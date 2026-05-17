@@ -33,6 +33,13 @@ function Navigation() {
                   <span className="font-medium">Home</span>
                 </Link>
                 <Link
+                  to="/races"
+                  className="flex items-center space-x-2 px-4 py-2 rounded-lg text-[#94A3B8] hover:text-white hover:bg-[#334155] transition-all duration-300 group"
+                >
+                  <Trophy className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                  <span className="font-medium">Races</span>
+                </Link>
+                <Link
                   to="/memberships"
                   className="flex items-center space-x-2 px-4 py-2 rounded-lg text-[#94A3B8] hover:text-white hover:bg-[#334155] transition-all duration-300 group"
                 >

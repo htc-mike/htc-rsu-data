@@ -18,8 +18,8 @@ function Home() {
         const { data: races } = await supabase.from('races').select('race_id, name').limit(5)
         setRacesData(races || [])
 
-        // Fetch memberships data (level distribution)
-        const { data: memberships } = await supabase.from('v_memberships').select('club_membership_level_name').limit(100)
+        // Fetch memberships data (level distribution and active status)
+        const { data: memberships } = await supabase.from('v_memberships').select('club_membership_level_name, membership_end').limit(1000)
         setMembershipsData(memberships || [])
 
         // Fetch analytics data (race revenue summary)
@@ -48,6 +48,16 @@ function Home() {
   const formatNumber = (num) => {
     if (num === null || num === undefined || isNaN(num)) return '0'
     return new Intl.NumberFormat('en-US').format(num)
+  }
+
+  // Calculate active members (membership_end is in future or null)
+  const getActiveMemberCount = () => {
+    const now = new Date()
+    return membershipsData.filter(m => {
+      if (!m.membership_end) return true // No end date means active
+      const endDate = new Date(m.membership_end)
+      return endDate >= now
+    }).length
   }
 
   // Calculate membership level distribution for pie chart
@@ -120,7 +130,7 @@ function Home() {
             <ArrowRight className="h-5 w-5 text-[#94A3B8]" />
           </div>
           <h2 className="text-3xl font-bold text-white mb-2">Memberships</h2>
-          <p className="text-[#94A3B8]">{membershipsData.length} members</p>
+          <p className="text-[#94A3B8]">{getActiveMemberCount()} active members</p>
         </Link>
 
         <Link to="/analytics" className="card p-6 hover:scale-105 transition-transform cursor-pointer animate-fade-in" style={{ animationDelay: '0.3s' }}>
