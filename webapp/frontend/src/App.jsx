@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Navigation from './components/Navigation'
 import Login from './components/Login'
+import Home from './pages/Home'
 import Races from './pages/Races'
 import RaceDetail from './pages/RaceDetail'
 import Registrations from './pages/Registrations'
@@ -66,7 +67,7 @@ function AppContent() {
           <Routes>
             <Route path="/login" element={!user ? <Login /> : <Navigate to="/" replace />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/" element={<ProtectedRoute><Races /></ProtectedRoute>} />
+            <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
             <Route path="/races" element={<ProtectedRoute><Races /></ProtectedRoute>} />
             <Route path="/races/:raceId" element={<ProtectedRoute><RaceDetail /></ProtectedRoute>} />
             <Route path="/registrations" element={<ProtectedRoute><Registrations /></ProtectedRoute>} />
