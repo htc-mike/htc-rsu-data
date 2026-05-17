@@ -6,7 +6,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0F172A]">
       <div className="bg-slate-800 p-8 rounded-lg shadow-lg max-w-md w-full">
-        <h1 className="text-3xl font-bold text-white mb-6 text-center">HTC Race Admin</h1>
+        <h1 className="text-3xl font-bold text-white mb-6 text-center">HTC Data Portal</h1>
         <p className="text-slate-300 mb-8 text-center">Sign in to access race management and analytics</p>
         
         <button
