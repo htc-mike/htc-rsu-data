@@ -46,7 +46,9 @@ function Home() {
         }
 
         // Fetch results data from htc.results table
-        const { data: results } = await supabase.from('results').select('race_id, race_name')
+        const { data: results, error: resultsError } = await supabase.from('results').select('race_id, race_name')
+        console.log('Results data:', results)
+        console.log('Results error:', resultsError)
         setResultsData(results || [])
 
         // Fetch current balance from finance data
