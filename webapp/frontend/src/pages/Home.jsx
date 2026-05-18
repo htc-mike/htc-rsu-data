@@ -9,6 +9,7 @@ function Home() {
   const [membershipsData, setMembershipsData] = useState([])
   const [membershipMonthlyData, setMembershipMonthlyData] = useState([])
   const [resultsData, setResultsData] = useState([])
+  const [analyticsData, setAnalyticsData] = useState([])
   const [currentBalance, setCurrentBalance] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -50,6 +51,10 @@ function Home() {
           .from('v_race_finishers')
           .select('race_id, alias, race_year, finishers')
         setResultsData(finishers || [])
+
+        // Fetch analytics data for Registration Trends chart
+        const { data: analytics } = await supabase.rpc('get_race_revenue')
+        setAnalyticsData(analytics || [])
 
         // Fetch current balance from finance data
         const currentYear = new Date().getFullYear()
@@ -143,17 +148,21 @@ function Home() {
 
   // Calculate registrations trend for line chart
   const getRegistrationsTrend = () => {
-    if (!resultsData.length) return []
+    if (!analyticsData.length) return []
     
-    // Group results by year using race_name to extract year if possible
     const yearGroups = {}
-    resultsData.forEach(r => {
-      // Since results data doesn't have year, we'll skip this for now
-      // or we could add a year field to the results table
+    analyticsData.forEach(r => {
+      const year = Math.floor(r.year)
+      if (!yearGroups[year]) {
+        yearGroups[year] = 0
+      }
+      yearGroups[year] += Number(r.registration_count) || 0
     })
     
-    // For now, return empty or use a different approach
-    return []
+    return Object.keys(yearGroups).sort().map(year => ({
+      year: parseInt(year),
+      registrations: yearGroups[year]
+    }))
   }
 
   const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899']
