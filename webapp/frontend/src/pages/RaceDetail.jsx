@@ -44,10 +44,19 @@ function RaceDetail() {
           resultsCountMap.set(r.event_id, (resultsCountMap.get(r.event_id) || 0) + 1)
         })
         
-        // Add results_count to each event
+        // Get registration count for each event
+        const { data: registrations } = await supabase.from('registrations').select('event_id').in('event_id', eventIds)
+        
+        const registrationCountMap = new Map()
+        registrations?.forEach(r => {
+          registrationCountMap.set(r.event_id, (registrationCountMap.get(r.event_id) || 0) + 1)
+        })
+        
+        // Add results_count and registration_count to each event
         const eventsWithCounts = eventsResponse.data.map(event => ({
           ...event,
-          results_count: resultsCountMap.get(event.event_id) || 0
+          results_count: resultsCountMap.get(event.event_id) || 0,
+          registration_count: registrationCountMap.get(event.event_id) || 0
         }))
         
         setEvents(eventsWithCounts)
