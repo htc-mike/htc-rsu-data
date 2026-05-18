@@ -48,7 +48,7 @@ function Home() {
         // Fetch race finishers data from htc.v_race_finishers
         const { data: finishers, error: finishersError } = await supabase
           .from('v_race_finishers')
-          .select('race_id, race_name, finisher_count')
+          .select('race_id, race_name, year, finishers')
         console.log('Finishers data:', finishers)
         console.log('Finishers error:', finishersError)
         setResultsData(finishers || [])
@@ -114,14 +114,29 @@ function Home() {
   const getRaceParticipationData = () => {
     if (!resultsData.length) return []
     
-    // Use finisher_count directly from v_race_finishers
-    const raceFinishers = resultsData.map(r => {
+    // Group by race and get the last year of each race
+    const raceMap = new Map()
+    resultsData.forEach(r => {
+      const raceKey = r.race_id || r.race_name || 'Unknown'
+      if (!raceMap.has(raceKey)) {
+        raceMap.set(raceKey, r)
+      } else {
+        // Keep the most recent entry (higher year)
+        const existing = raceMap.get(raceKey)
+        if (r.year > existing.year) {
+          raceMap.set(raceKey, r)
+        }
+      }
+    })
+    
+    // Convert to array and map to include alias
+    const raceFinishers = Array.from(raceMap.values()).map(r => {
       // Use racesData to get alias
       const race = racesData.find(race => race.race_id === r.race_id || race.name === r.race_name)
       const alias = race?.alias || r.race_name?.substring(0, 15) + '...' || 'Unknown'
       return {
         name: alias,
-        count: Number(r.finisher_count) || 0
+        count: Number(r.finishers) || 0
       }
     })
     
