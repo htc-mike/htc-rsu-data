@@ -10,6 +10,7 @@ function Home() {
   const [membershipMonthlyData, setMembershipMonthlyData] = useState([])
   const [resultsData, setResultsData] = useState([])
   const [analyticsData, setAnalyticsData] = useState([])
+  const [balanceOverTimeData, setBalanceOverTimeData] = useState([])
   const [currentBalance, setCurrentBalance] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -53,6 +54,23 @@ function Home() {
         // Fetch analytics data for Registration Trends chart
         const { data: analytics } = await supabase.rpc('get_race_revenue')
         setAnalyticsData(analytics || [])
+
+        // Fetch balance over time data from v_check_register_summary
+        const { data: summaryData } = await supabase
+          .from('v_check_register_summary')
+          .select('*')
+          .order('trans_date', { ascending: true })
+        if (summaryData) {
+          const twelveMonthsAgo = new Date()
+          twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12)
+          const filteredData = summaryData
+            .filter(s => new Date(s.trans_date) >= twelveMonthsAgo)
+            .map(s => ({
+              date: new Date(s.trans_date).toLocaleDateString('en-US', { year: '2-digit', month: 'short' }),
+              balance: s.balance || 0
+            }))
+          setBalanceOverTimeData(filteredData)
+        }
 
         // Fetch current balance from finance data
         const currentYear = new Date().getFullYear()
@@ -263,29 +281,30 @@ function Home() {
           </ResponsiveContainer>
         </div>
 
-        {/* Registrations Trend */}
+        {/* Balance Over Time */}
         <div className="card p-6 lg:col-span-2 animate-slide-in">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-white">Registration Trends</h2>
-            <TrendingUp className="h-6 w-6 text-blue-400" />
+            <h2 className="text-2xl font-bold text-white">Balance Over Time</h2>
+            <DollarSign className="h-6 w-6 text-blue-400" />
           </div>
           <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={getRegistrationsTrend()}>
+            <LineChart data={balanceOverTimeData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="year" stroke="#94A3B8" fill="#94A3B8" />
-              <YAxis stroke="#94A3B8" fill="#94A3B8" />
+              <XAxis dataKey="date" stroke="#94A3B8" fill="#94A3B8" />
+              <YAxis stroke="#94A3B8" fill="#94A3B8" tickFormatter={formatCurrency} />
               <Tooltip 
-                formatter={(value) => formatNumber(value)}
                 contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '8px' }}
                 itemStyle={{ color: '#F8FAFC' }}
+                formatter={(value) => formatCurrency(value)}
               />
               <Legend />
               <Line 
-                dataKey="registrations" 
-                stroke="#10b981" 
-                strokeWidth={3}
-                dot={{ r: 6 }}
-                name="Registrations"
+                type="monotone"
+                dataKey="balance" 
+                stroke="#3B82F6" 
+                strokeWidth={2}
+                dot={{ r: 4 }}
+                name="Balance"
               />
             </LineChart>
           </ResponsiveContainer>
