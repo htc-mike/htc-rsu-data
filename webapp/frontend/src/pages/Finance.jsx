@@ -39,7 +39,12 @@ function Finance() {
         
         // Calculate KPIs for current year only
         const currentYear = new Date().getFullYear()
+        console.log('Current year:', currentYear)
+        console.log('Detail data length:', detailData?.length)
+        console.log('Sample detail data:', detailData?.slice(0, 3))
+        
         const currentYearData = detailData ? detailData.filter(d => d.trans_year === currentYear) : []
+        console.log('Current year data length:', currentYearData.length)
         
         // Sort by trans_date DESC to get most recent first
         currentYearData.sort((a, b) => new Date(b.trans_date) - new Date(a.trans_date))
@@ -50,6 +55,8 @@ function Finance() {
         const withdrawalsToDate = currentYearData ? currentYearData.reduce((sum, d) => sum + (d.withdrawal || 0), 0) : 0
         const depositsToDate = currentYearData ? currentYearData.reduce((sum, d) => sum + (d.deposit || 0), 0) : 0
         const transactionsToDate = currentYearData ? currentYearData.length : 0
+        
+        console.log('KPIs:', { currentBalance, withdrawalsToDate, depositsToDate, transactionsToDate })
         
         setKpiData({
           currentBalance,
