@@ -7,6 +7,7 @@ import { supabase } from '../supabaseClient.js'
 function Home() {
   const [racesData, setRacesData] = useState([])
   const [membershipsData, setMembershipsData] = useState([])
+  const [membershipMonthlyData, setMembershipMonthlyData] = useState([])
   const [analyticsData, setAnalyticsData] = useState([])
   const [currentBalance, setCurrentBalance] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -16,12 +17,33 @@ function Home() {
     const fetchData = async () => {
       try {
         // Fetch races data (total races count)
-        const { data: races } = await supabase.from('races').select('race_id, name').limit(5)
+        const { data: races } = await supabase.from('races').select('race_id, name, alias').limit(5)
         setRacesData(races || [])
 
         // Fetch memberships data (level distribution and active status)
         const { data: memberships } = await supabase.from('v_memberships').select('club_membership_level_name, membership_end').limit(1000)
         setMembershipsData(memberships || [])
+
+        // Fetch monthly membership data for last 12 months
+        const twelveMonthsAgo = new Date()
+        twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12)
+        const { data: monthlyMemberships } = await supabase
+          .from('v_memberships')
+          .select('membership_start')
+          .gte('membership_start', twelveMonthsAgo.toISOString())
+        if (monthlyMemberships) {
+          const monthlyCount = {}
+          monthlyMemberships.forEach(m => {
+            const date = new Date(m.membership_start)
+            const monthKey = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
+            monthlyCount[monthKey] = (monthlyCount[monthKey] || 0) + 1
+          })
+          const sortedMonths = Object.keys(monthlyCount).sort((a, b) => new Date(a) - new Date(b))
+          setMembershipMonthlyData(sortedMonths.map(month => ({
+            month,
+            count: monthlyCount[month]
+          })))
+        }
 
         // Fetch analytics data (race revenue summary)
         const { data: analytics } = await supabase.rpc('get_race_revenue')
@@ -84,13 +106,13 @@ function Home() {
     }))
   }
 
-  // Calculate race revenue for bar chart
-  const getRaceRevenueData = () => {
+  // Calculate race participation for bar chart
+  const getRaceParticipationData = () => {
     if (!analyticsData.length) return []
     
     return analyticsData.slice(0, 5).map(r => ({
-      name: r.race_name?.substring(0, 15) + '...' || 'Unknown',
-      revenue: Number(r.total_revenue) || 0
+      name: r.alias || r.race_name?.substring(0, 15) + '...' || 'Unknown',
+      count: Number(r.registration_count) || 0
     }))
   }
 
@@ -164,54 +186,52 @@ function Home() {
 
       {/* Graphs Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
-        {/* Membership Level Distribution */}
+        {/* Race Participation */}
+        <div className="card p-6 animate-slide-in">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-white">Race Participation</h2>
+            <Trophy className="h-6 w-6 text-orange-400" />
+          </div>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={getRaceParticipationData()}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+              <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} stroke="#94A3B8" fill="#94A3B8" />
+              <YAxis stroke="#94A3B8" fill="#94A3B8" />
+              <Tooltip 
+                formatter={(value) => formatNumber(value)}
+                contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '8px' }}
+                itemStyle={{ color: '#F8FAFC' }}
+              />
+              <Bar dataKey="count" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Membership Levels by Month */}
         <div className="card p-6 animate-slide-in">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold text-white">Membership Levels</h2>
             <UserCheck className="h-6 w-6 text-green-400" />
           </div>
           <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={getMembershipLevelData()}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {getMembershipLevelData().map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip 
-                contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '8px' }}
-                itemStyle={{ color: '#F8FAFC' }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Race Revenue */}
-        <div className="card p-6 animate-slide-in">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-white">Top Races by Revenue</h2>
-            <DollarSign className="h-6 w-6 text-orange-400" />
-          </div>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={getRaceRevenueData()}>
+            <LineChart data={membershipMonthlyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} stroke="#94A3B8" fill="#94A3B8" />
+              <XAxis dataKey="month" stroke="#94A3B8" fill="#94A3B8" angle={-45} textAnchor="end" height={60} />
               <YAxis stroke="#94A3B8" fill="#94A3B8" />
               <Tooltip 
-                formatter={(value) => formatCurrency(value)}
+                formatter={(value) => formatNumber(value)}
                 contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '8px' }}
                 itemStyle={{ color: '#F8FAFC' }}
               />
-              <Bar dataKey="revenue" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-            </BarChart>
+              <Legend />
+              <Line 
+                dataKey="count" 
+                stroke="#10b981" 
+                strokeWidth={3}
+                dot={{ r: 6 }}
+                name="New Memberships"
+              />
+            </LineChart>
           </ResponsiveContainer>
         </div>
 
