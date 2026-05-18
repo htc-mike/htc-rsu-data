@@ -25,23 +25,44 @@ function Home() {
         const { data: memberships } = await supabase.from('v_memberships').select('club_membership_level_name, membership_end').limit(1000)
         setMembershipsData(memberships || [])
 
-        // Fetch membership summary data for last 12 months
-        const { data: membershipSummary, error: summaryError } = await supabase
-          .from('v_membership_summary')
-          .select('*')
-        console.log('Membership summary data:', membershipSummary)
-        console.log('Membership summary error:', summaryError)
-        if (membershipSummary) {
+        // Fetch membership data to calculate monthly ending totals
+        const { data: membershipData } = await supabase
+          .from('v_memberships')
+          .select('membership_start, membership_end')
+          .limit(10000)
+        if (membershipData) {
           const twelveMonthsAgo = new Date()
           twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12)
-          const sortedData = membershipSummary
-            .filter(m => new Date(m.month) >= twelveMonthsAgo)
-            .sort((a, b) => new Date(a.month) - new Date(b.month))
-            .map(m => ({
-              month: new Date(m.month).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
-              count: Number(m.ending_total) || 0
-            }))
-          setMembershipMonthlyData(sortedData)
+          twelveMonthsAgo.setDate(1) // Set to first of month
+          
+          const monthlyTotals = new Map()
+          
+          // Calculate for each month in the last 12 months
+          for (let i = 0; i < 12; i++) {
+            const monthDate = new Date()
+            monthDate.setMonth(monthDate.getMonth() - i)
+            monthDate.setDate(1)
+            const monthKey = monthDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
+            
+            // Count memberships that were active at the end of this month
+            const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0)
+            let count = 0
+            membershipData.forEach(m => {
+              const startDate = new Date(m.membership_start)
+              const endDate = m.membership_end ? new Date(m.membership_end) : new Date()
+              if (startDate <= monthEnd && endDate >= monthEnd) {
+                count++
+              }
+            })
+            
+            monthlyTotals.set(monthKey, count)
+          }
+          
+          const sortedMonths = Array.from(monthlyTotals.entries())
+            .sort((a, b) => new Date(a[0]) - new Date(b[0]))
+            .map(([month, count]) => ({ month, count }))
+          
+          setMembershipMonthlyData(sortedMonths)
         }
 
         // Fetch race finishers data from htc.v_race_finishers
