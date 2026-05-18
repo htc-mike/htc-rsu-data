@@ -26,15 +26,16 @@ function Home() {
         setMembershipsData(memberships || [])
 
         // Fetch membership summary data for last 12 months
-        const twelveMonthsAgo = new Date()
-        twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12)
-        const { data: membershipSummary } = await supabase
+        const { data: membershipSummary, error: summaryError } = await supabase
           .from('v_membership_summary')
           .select('*')
-          .gte('month', twelveMonthsAgo.toISOString())
         console.log('Membership summary data:', membershipSummary)
+        console.log('Membership summary error:', summaryError)
         if (membershipSummary) {
+          const twelveMonthsAgo = new Date()
+          twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12)
           const sortedData = membershipSummary
+            .filter(m => new Date(m.month) >= twelveMonthsAgo)
             .sort((a, b) => new Date(a.month) - new Date(b.month))
             .map(m => ({
               month: new Date(m.month).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
