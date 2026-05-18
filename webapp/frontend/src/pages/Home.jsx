@@ -45,13 +45,13 @@ function Home() {
           })))
         }
 
-        // Fetch results data from htc.results table
-        const { data: results, error: resultsError } = await supabase
-          .from('results')
-          .select('race_id')
-        console.log('Results data:', results)
-        console.log('Results error:', resultsError)
-        setResultsData(results || [])
+        // Fetch race finishers data from htc.v_race_finishers
+        const { data: finishers, error: finishersError } = await supabase
+          .from('v_race_finishers')
+          .select('race_id, race_name, finisher_count')
+        console.log('Finishers data:', finishers)
+        console.log('Finishers error:', finishersError)
+        setResultsData(finishers || [])
 
         // Fetch current balance from finance data
         const currentYear = new Date().getFullYear()
@@ -110,30 +110,23 @@ function Home() {
     }))
   }
 
-  // Calculate race participation for bar chart
+  // Calculate race finishers for bar chart
   const getRaceParticipationData = () => {
     if (!resultsData.length) return []
     
-    // Count total results for each race
-    const raceCountMap = new Map()
-    resultsData.forEach(r => {
-      const raceKey = r.race_id || 'Unknown'
-      raceCountMap.set(raceKey, (raceCountMap.get(raceKey) || 0) + 1)
-    })
-    
-    // Convert to array and map to include alias
-    const raceParticipation = Array.from(raceCountMap.entries()).map(([raceKey, count]) => {
+    // Use finisher_count directly from v_race_finishers
+    const raceFinishers = resultsData.map(r => {
       // Use racesData to get alias
-      const race = racesData.find(race => race.race_id === raceKey)
-      const alias = race?.alias || race?.name?.substring(0, 15) + '...' || raceKey?.substring(0, 15) + '...' || 'Unknown'
+      const race = racesData.find(race => race.race_id === r.race_id || race.name === r.race_name)
+      const alias = race?.alias || r.race_name?.substring(0, 15) + '...' || 'Unknown'
       return {
         name: alias,
-        count: count
+        count: Number(r.finisher_count) || 0
       }
     })
     
     // Sort by count and take top 5
-    return raceParticipation.sort((a, b) => b.count - a.count).slice(0, 5)
+    return raceFinishers.sort((a, b) => b.count - a.count).slice(0, 5)
   }
 
   // Calculate registrations trend for line chart
@@ -202,10 +195,10 @@ function Home() {
 
       {/* Graphs Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
-        {/* Race Participation */}
+        {/* Race Finishers */}
         <div className="card p-6 animate-slide-in">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-white">Race Participation</h2>
+            <h2 className="text-2xl font-bold text-white">Race Finishers</h2>
             <Trophy className="h-6 w-6 text-orange-400" />
           </div>
           <ResponsiveContainer width="100%" height={250}>
