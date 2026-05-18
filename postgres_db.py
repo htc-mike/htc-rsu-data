@@ -136,7 +136,7 @@ class PostgresDB():
             df.columns = df.columns.str.replace("[@. -]","_", regex=True)
 
             try:                
-                tuples = [tuple(x) for x in df.to_numpy()] 
+                tuples = [tuple(None if pd.isna(val) or val == '' else val for val in row) for row in df.to_numpy()] 
                 cols = ','.join(list(df.columns))
                 query = "INSERT INTO %s(%s) VALUES %%s  ON CONFLICT DO NOTHING" % (table_name, cols)
                 extras.execute_values(cursor, query, tuples)

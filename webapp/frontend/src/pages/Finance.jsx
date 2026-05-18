@@ -1,0 +1,282 @@
+import { useState, useEffect } from 'react'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { DollarSign, TrendingDown, TrendingUp, Activity, Filter } from 'lucide-react'
+import { supabase } from '../supabaseClient.js'
+
+function Finance() {
+  const [kpiData, setKpiData] = useState(null)
+  const [summaryData, setSummaryData] = useState([])
+  const [detailData, setDetailData] = useState([])
+  const [filteredDetailData, setFilteredDetailData] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [yearFilter, setYearFilter] = useState('all')
+  const [availableYears, setAvailableYears] = useState([])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        
+        // Fetch KPI data from v_check_register_detail
+        const { data: detailData, error: detailError } = await supabase
+          .from('v_check_register_detail')
+          .select('*')
+        
+        if (detailError) throw detailError
+        
+        // Fetch summary data from v_check_register_summary
+        const { data: summaryData, error: summaryError } = await supabase
+          .from('v_check_register_summary')
+          .select('*')
+          .order('trans_date', { ascending: true })
+        
+        if (summaryError) throw summaryError
+        
+        setDetailData(detailData || [])
+        setFilteredDetailData(detailData || [])
+        setSummaryData(summaryData || [])
+        
+        // Calculate KPIs
+        const currentBalance = detailData && detailData.length > 0 
+          ? Math.max(...detailData.map(d => d.balance || 0))
+          : 0
+        const withdrawalsToDate = detailData ? detailData.reduce((sum, d) => sum + (d.withdrawal || 0), 0) : 0
+        const depositsToDate = detailData ? detailData.reduce((sum, d) => sum + (d.deposit || 0), 0) : 0
+        const transactionsToDate = detailData ? detailData.length : 0
+        
+        setKpiData({
+          currentBalance,
+          withdrawalsToDate,
+          depositsToDate,
+          transactionsToDate
+        })
+        
+        // Extract unique years for filter
+        const years = [...new Set(detailData?.map(d => d.trans_year).filter(Boolean))]
+        setAvailableYears(years.sort())
+        
+        setLoading(false)
+      } catch (err) {
+        console.error('Failed to load finance data:', err)
+        setError('Failed to load finance data')
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
+  useEffect(() => {
+    let filtered = detailData
+    
+    // Apply year filter
+    if (yearFilter !== 'all') {
+      filtered = filtered.filter(d => d.trans_year === parseInt(yearFilter))
+    }
+    
+    setFilteredDetailData(filtered)
+  }, [yearFilter, detailData])
+
+  const formatCurrency = (amount) => {
+    if (amount === null || amount === undefined) return '$0.00'
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount)
+  }
+
+  const formatNumber = (num) => {
+    if (num === null || num === undefined) return '0'
+    return new Intl.NumberFormat('en-US').format(num)
+  }
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'N/A'
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+
+  const formatMonthYear = (dateStr) => {
+    if (!dateStr) return ''
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      year: '2-digit',
+      month: 'short'
+    })
+  }
+
+  // Prepare time series data
+  const timeSeriesData = summaryData.map(item => ({
+    date: formatMonthYear(item.trans_date),
+    balance: item.balance || 0
+  }))
+
+  if (loading) return <div className="text-center py-12 text-[#94A3B8] animate-fade-in">Loading finance data...</div>
+  if (error) return <div className="text-center py-12 text-red-400">{error}</div>
+
+  return (
+    <div className="animate-fade-in">
+      <h1 className="text-5xl font-bold mb-8 text-white">Finance</h1>
+
+      {/* KPI Tiles */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="card p-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-[#94A3B8]">Current Balance</p>
+              <p className="text-3xl font-bold text-white">{formatCurrency(kpiData?.currentBalance)}</p>
+            </div>
+            <DollarSign className="h-8 w-8 text-blue-400" />
+          </div>
+        </div>
+        <div className="card p-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-[#94A3B8]">Withdrawals to Date</p>
+              <p className="text-3xl font-bold text-white">{formatCurrency(kpiData?.withdrawalsToDate)}</p>
+            </div>
+            <TrendingDown className="h-8 w-8 text-red-400" />
+          </div>
+        </div>
+        <div className="card p-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-[#94A3B8]">Deposits to Date</p>
+              <p className="text-3xl font-bold text-white">{formatCurrency(kpiData?.depositsToDate)}</p>
+            </div>
+            <TrendingUp className="h-8 w-8 text-green-400" />
+          </div>
+        </div>
+        <div className="card p-6 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-[#94A3B8]">Transactions to Date</p>
+              <p className="text-3xl font-bold text-white">{formatNumber(kpiData?.transactionsToDate)}</p>
+            </div>
+            <Activity className="h-8 w-8 text-orange-400" />
+          </div>
+        </div>
+      </div>
+
+      {/* Time Series Chart */}
+      <div className="card p-6 mb-8 animate-slide-in">
+        <h2 className="text-2xl font-bold text-white mb-4">Balance Over Time</h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={timeSeriesData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+            <XAxis dataKey="date" stroke="#94A3B8" fill="#94A3B8" />
+            <YAxis stroke="#94A3B8" fill="#94A3B8" tickFormatter={formatCurrency} />
+            <Tooltip 
+              contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '8px' }}
+              itemStyle={{ color: '#F8FAFC' }}
+              formatter={(value) => formatCurrency(value)}
+            />
+            <Legend />
+            <Line type="monotone" dataKey="balance" stroke="#3B82F6" strokeWidth={2} dot={{ r: 4 }} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Summary Grid */}
+      <div className="card p-6 mb-8 animate-slide-in">
+        <h2 className="text-2xl font-bold text-white mb-4">Monthly Summary</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-[#0F172A]">
+              <tr>
+                {summaryData.length > 0 && Object.keys(summaryData[0])
+                  .filter(key => key !== 'trans_date')
+                  .map(key => (
+                    <th key={key} className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">
+                      {key.replace(/_/g, ' ')}
+                    </th>
+                  ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#334155]">
+              {summaryData.length === 0 ? (
+                <tr>
+                  <td colSpan="10" className="px-6 py-12 text-center text-[#94A3B8]">No summary data found</td>
+                </tr>
+              ) : (
+                summaryData.map((row, index) => (
+                  <tr key={index} className="hover:bg-[#334155] transition-colors">
+                    {Object.entries(row)
+                      .filter(([key]) => key !== 'trans_date')
+                      .map(([key, value]) => (
+                        <td key={key} className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                          {key.includes('balance') || key.includes('deposit') || key.includes('withdrawal') 
+                            ? formatCurrency(value) 
+                            : key.includes('date') 
+                              ? formatDate(value)
+                              : value || 'N/A'}
+                        </td>
+                      ))}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Detail Grid with Filter */}
+      <div className="card p-6 animate-slide-in">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold text-white">Transaction Details</h2>
+          <div className="relative">
+            <Filter className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-[#94A3B8]" />
+            <select
+              value={yearFilter}
+              onChange={(e) => setYearFilter(e.target.value)}
+              className="pl-10 pr-4 py-2 bg-[#1E293B] border border-[#334155] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none cursor-pointer"
+            >
+              <option value="all">All Years</option>
+              {availableYears.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-[#0F172A]">
+              <tr>
+                {detailData.length > 0 && Object.keys(detailData[0]).map(key => (
+                  <th key={key} className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">
+                    {key.replace(/_/g, ' ')}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#334155]">
+              {filteredDetailData.length === 0 ? (
+                <tr>
+                  <td colSpan="12" className="px-6 py-12 text-center text-[#94A3B8]">No transactions found</td>
+                </tr>
+              ) : (
+                filteredDetailData.map((row, index) => (
+                  <tr key={index} className="hover:bg-[#334155] transition-colors">
+                    {Object.entries(row).map(([key, value]) => (
+                      <td key={key} className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                        {key.includes('balance') || key.includes('deposit') || key.includes('withdrawal') 
+                          ? formatCurrency(value) 
+                          : key.includes('date') 
+                            ? formatDate(value)
+                            : value !== null && value !== undefined ? value : 'N/A'}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default Finance
