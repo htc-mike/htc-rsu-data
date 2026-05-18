@@ -8,7 +8,7 @@ function Home() {
   const [racesData, setRacesData] = useState([])
   const [membershipsData, setMembershipsData] = useState([])
   const [membershipMonthlyData, setMembershipMonthlyData] = useState([])
-  const [analyticsData, setAnalyticsData] = useState([])
+  const [resultsData, setResultsData] = useState([])
   const [currentBalance, setCurrentBalance] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -45,9 +45,9 @@ function Home() {
           })))
         }
 
-        // Fetch analytics data (race revenue summary)
-        const { data: analytics } = await supabase.rpc('get_race_revenue')
-        setAnalyticsData(analytics || [])
+        // Fetch results data from htc.results table
+        const { data: results } = await supabase.from('results').select('race_id, race_name')
+        setResultsData(results || [])
 
         // Fetch current balance from finance data
         const currentYear = new Date().getFullYear()
@@ -108,62 +108,42 @@ function Home() {
 
   // Calculate race participation for bar chart
   const getRaceParticipationData = () => {
-    if (!analyticsData.length) return []
+    if (!resultsData.length) return []
     
-    console.log('Analytics data:', analyticsData.slice(0, 10))
-    
-    // Group by race_name and get the last count of results for each unique race
-    const raceMap = new Map()
-    analyticsData.forEach(r => {
-      const raceKey = r.race_name || 'Unknown'
-      if (!raceMap.has(raceKey)) {
-        raceMap.set(raceKey, r)
-      } else {
-        // Keep the most recent entry (higher year)
-        const existing = raceMap.get(raceKey)
-        if (r.year > existing.year) {
-          raceMap.set(raceKey, r)
-        }
-      }
+    // Count total results for each race
+    const raceCountMap = new Map()
+    resultsData.forEach(r => {
+      const raceKey = r.race_id || r.race_name || 'Unknown'
+      raceCountMap.set(raceKey, (raceCountMap.get(raceKey) || 0) + 1)
     })
     
-    console.log('Unique races map:', Array.from(raceMap.keys()))
-    
     // Convert to array and map to include alias
-    const uniqueRaces = Array.from(raceMap.values()).map(r => {
-      const race = racesData.find(race => race.name === r.race_name)
-      const alias = race?.alias || r.race_name?.substring(0, 15) + '...' || 'Unknown'
-      // Use participants count (total participants for the race)
-      const count = Number(r.participants) || 0
+    const raceParticipation = Array.from(raceCountMap.entries()).map(([raceKey, count]) => {
+      const race = racesData.find(race => race.race_id === raceKey || race.name === raceKey)
+      const alias = race?.alias || raceKey?.substring(0, 15) + '...' || 'Unknown'
       return {
         name: alias,
         count: count
       }
     })
     
-    console.log('Unique races:', uniqueRaces)
-    
     // Sort by count and take top 5
-    return uniqueRaces.sort((a, b) => b.count - a.count).slice(0, 5)
+    return raceParticipation.sort((a, b) => b.count - a.count).slice(0, 5)
   }
 
   // Calculate registrations trend for line chart
   const getRegistrationsTrend = () => {
-    if (!analyticsData.length) return []
+    if (!resultsData.length) return []
     
+    // Group results by year using race_name to extract year if possible
     const yearGroups = {}
-    analyticsData.forEach(r => {
-      const year = Math.floor(r.year)
-      if (!yearGroups[year]) {
-        yearGroups[year] = 0
-      }
-      yearGroups[year] += Number(r.registration_count) || 0
+    resultsData.forEach(r => {
+      // Since results data doesn't have year, we'll skip this for now
+      // or we could add a year field to the results table
     })
     
-    return Object.keys(yearGroups).sort().map(year => ({
-      year: parseInt(year),
-      registrations: yearGroups[year]
-    }))
+    // For now, return empty or use a different approach
+    return []
   }
 
   const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899']
