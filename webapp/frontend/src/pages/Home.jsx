@@ -257,7 +257,7 @@ function Home() {
                 stroke="#10b981" 
                 strokeWidth={3}
                 dot={{ r: 6 }}
-                name="New Memberships"
+                name="Memberships"
               />
             </LineChart>
           </ResponsiveContainer>
