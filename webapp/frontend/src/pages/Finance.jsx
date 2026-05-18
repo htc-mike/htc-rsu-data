@@ -6,12 +6,16 @@ import { supabase } from '../supabaseClient.js'
 function Finance() {
   const [kpiData, setKpiData] = useState(null)
   const [summaryData, setSummaryData] = useState([])
+  const [filteredSummaryData, setFilteredSummaryData] = useState([])
   const [detailData, setDetailData] = useState([])
   const [filteredDetailData, setFilteredDetailData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [yearFilter, setYearFilter] = useState('all')
+  const [summaryYearFilter, setSummaryYearFilter] = useState(new Date().getFullYear().toString())
   const [availableYears, setAvailableYears] = useState([])
+  const [selectedMonth, setSelectedMonth] = useState(null)
+  const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,12 +43,7 @@ function Finance() {
         
         // Calculate KPIs for current year only
         const currentYear = new Date().getFullYear()
-        console.log('Current year:', currentYear)
-        console.log('Detail data length:', detailData?.length)
-        console.log('Sample detail data:', detailData?.slice(0, 3))
-        
         const currentYearData = detailData ? detailData.filter(d => d.trans_year === currentYear) : []
-        console.log('Current year data length:', currentYearData.length)
         
         // Sort by trans_date DESC to get most recent first
         currentYearData.sort((a, b) => new Date(b.trans_date) - new Date(a.trans_date))
@@ -55,8 +54,6 @@ function Finance() {
         const withdrawalsToDate = currentYearData ? currentYearData.reduce((sum, d) => sum + (d.withdrawal || 0), 0) : 0
         const depositsToDate = currentYearData ? currentYearData.reduce((sum, d) => sum + (d.deposit || 0), 0) : 0
         const transactionsToDate = currentYearData ? currentYearData.length : 0
-        
-        console.log('KPIs:', { currentBalance, withdrawalsToDate, depositsToDate, transactionsToDate })
         
         setKpiData({
           currentBalance,
@@ -90,12 +87,30 @@ function Finance() {
     setFilteredDetailData(filtered)
   }, [yearFilter, detailData])
 
+  useEffect(() => {
+    let filtered = summaryData
+    
+    // Apply summary year filter
+    if (summaryYearFilter !== 'all') {
+      filtered = filtered.filter(d => d.trans_year === parseInt(summaryYearFilter))
+    }
+    
+    setFilteredSummaryData(filtered)
+  }, [summaryYearFilter, summaryData])
+
   const formatCurrency = (amount) => {
     if (amount === null || amount === undefined) return '$0.00'
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD'
     }).format(amount)
+  }
+
+  const formatCompactCurrency = (amount) => {
+    if (amount === null || amount === undefined) return '$0'
+    if (amount >= 1000000) return `$${(amount / 1000000).toFixed(1)}M`
+    if (amount >= 1000) return `$${(amount / 1000).toFixed(0)}K`
+    return `$${amount.toFixed(0)}`
   }
 
   const formatNumber = (num) => {
@@ -117,6 +132,16 @@ function Finance() {
     return new Date(dateStr).toLocaleDateString('en-US', {
       year: '2-digit',
       month: 'short'
+    })
+  }
+
+  const getMonthTransactions = (monthData) => {
+    if (!monthData) return []
+    const month = new Date(monthData.trans_date).getMonth()
+    const year = monthData.trans_year
+    return detailData.filter(d => {
+      const dMonth = new Date(d.trans_date).getMonth()
+      return dMonth === month && d.trans_year === year
     })
   }
 
@@ -180,7 +205,7 @@ function Finance() {
           <LineChart data={timeSeriesData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
             <XAxis dataKey="date" stroke="#94A3B8" fill="#94A3B8" />
-            <YAxis stroke="#94A3B8" fill="#94A3B8" tickFormatter={formatCurrency} />
+            <YAxis stroke="#94A3B8" fill="#94A3B8" tickFormatter={formatCompactCurrency} />
             <Tooltip 
               contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '8px' }}
               itemStyle={{ color: '#F8FAFC' }}
@@ -194,48 +219,13 @@ function Finance() {
 
       {/* Summary Grid */}
       <div className="card p-6 mb-8 animate-slide-in">
-        <h2 className="text-2xl font-bold text-white mb-4">Monthly Summary</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-[#0F172A]">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Month</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Year</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Balance</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Bank Balance</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Statement Balance</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#334155]">
-              {summaryData.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center text-[#94A3B8]">No summary data found</td>
-                </tr>
-              ) : (
-                summaryData.map((row, index) => (
-                  <tr key={index} className="hover:bg-[#334155] transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{row.trans_month || formatDate(row.trans_date)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{row.trans_year}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatCurrency(row.balance)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatCurrency(row.bank_balance)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatCurrency(row.statement_balance)}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Detail Grid with Filter */}
-      <div className="card p-6 animate-slide-in">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-white">Transaction Details</h2>
+          <h2 className="text-2xl font-bold text-white">Monthly Summary</h2>
           <div className="relative">
             <Filter className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-[#94A3B8]" />
             <select
-              value={yearFilter}
-              onChange={(e) => setYearFilter(e.target.value)}
+              value={summaryYearFilter}
+              onChange={(e) => setSummaryYearFilter(e.target.value)}
               className="pl-10 pr-4 py-2 bg-[#1E293B] border border-[#334155] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none cursor-pointer"
             >
               <option value="all">All Years</option>
@@ -249,32 +239,33 @@ function Finance() {
           <table className="w-full">
             <thead className="bg-[#0F172A]">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Number</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">To/From</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Description</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Deposit</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Withdrawal</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Note</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Month</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Year</th>
                 <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Balance</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Bank Balance</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Statement Balance</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#334155]">
-              {filteredDetailData.length === 0 ? (
+              {filteredSummaryData.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="px-6 py-12 text-center text-[#94A3B8]">No transactions found</td>
+                  <td colSpan="5" className="px-6 py-12 text-center text-[#94A3B8]">No summary data found</td>
                 </tr>
               ) : (
-                filteredDetailData.map((row, index) => (
-                  <tr key={index} className="hover:bg-[#334155] transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{row.number || 'N/A'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatDate(row.trans_date)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{row.to_from || 'N/A'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{row.description || 'N/A'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatCurrency(row.deposit)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatCurrency(row.withdrawal)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{row.note || 'N/A'}</td>
+                filteredSummaryData.map((row, index) => (
+                  <tr 
+                    key={index} 
+                    className="hover:bg-[#334155] transition-colors cursor-pointer"
+                    onClick={() => {
+                      setSelectedMonth(row)
+                      setShowModal(true)
+                    }}
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-400 hover:text-blue-300">{row.trans_month || formatDate(row.trans_date)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{row.trans_year}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatCurrency(row.balance)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatCurrency(row.bank_balance)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatCurrency(row.statement_balance)}</td>
                   </tr>
                 ))
               )}
@@ -282,6 +273,61 @@ function Finance() {
           </table>
         </div>
       </div>
+
+      {/* Modal for Transaction Details */}
+      {showModal && selectedMonth && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setShowModal(false)}>
+          <div className="bg-[#1E293B] rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center p-6 border-b border-[#334155]">
+              <h2 className="text-2xl font-bold text-white">
+                Transaction Details - {selectedMonth.trans_month} {selectedMonth.trans_year}
+              </h2>
+              <button 
+                onClick={() => setShowModal(false)}
+                className="text-[#94A3B8] hover:text-white transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="overflow-x-auto p-6">
+              <table className="w-full">
+                <thead className="bg-[#0F172A]">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Number</th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">To/From</th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Description</th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Deposit</th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Withdrawal</th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Note</th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Balance</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#334155]">
+                  {getMonthTransactions(selectedMonth).length === 0 ? (
+                    <tr>
+                      <td colSpan="8" className="px-6 py-12 text-center text-[#94A3B8]">No transactions found for this month</td>
+                    </tr>
+                  ) : (
+                    getMonthTransactions(selectedMonth).map((row, index) => (
+                      <tr key={index} className="hover:bg-[#334155] transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{row.number || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatDate(row.trans_date)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{row.to_from || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{row.description || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatCurrency(row.deposit)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatCurrency(row.withdrawal)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{row.note || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatCurrency(row.balance)}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
