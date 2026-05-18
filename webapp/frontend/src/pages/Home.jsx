@@ -191,7 +191,7 @@ function Home() {
             <ArrowRight className="h-5 w-5 text-[#94A3B8]" />
           </div>
           <h2 className="text-3xl font-bold text-white mb-2">Analytics</h2>
-          <p className="text-[#94A3B8]">{analyticsData.length} data points</p>
+          <p className="text-[#94A3B8]">{resultsData.length} data points</p>
         </Link>
       </div>
 
