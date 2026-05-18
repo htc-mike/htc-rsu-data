@@ -25,25 +25,22 @@ function Home() {
         const { data: memberships } = await supabase.from('v_memberships').select('club_membership_level_name, membership_end').limit(1000)
         setMembershipsData(memberships || [])
 
-        // Fetch monthly membership data for last 12 months
+        // Fetch membership summary data for last 12 months
         const twelveMonthsAgo = new Date()
         twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12)
-        const { data: monthlyMemberships } = await supabase
-          .from('v_memberships')
-          .select('membership_start')
-          .gte('membership_start', twelveMonthsAgo.toISOString())
-        if (monthlyMemberships) {
-          const monthlyCount = {}
-          monthlyMemberships.forEach(m => {
-            const date = new Date(m.membership_start)
-            const monthKey = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
-            monthlyCount[monthKey] = (monthlyCount[monthKey] || 0) + 1
-          })
-          const sortedMonths = Object.keys(monthlyCount).sort((a, b) => new Date(a) - new Date(b))
-          setMembershipMonthlyData(sortedMonths.map(month => ({
-            month,
-            count: monthlyCount[month]
-          })))
+        const { data: membershipSummary } = await supabase
+          .from('v_membership_summary')
+          .select('*')
+          .gte('month', twelveMonthsAgo.toISOString())
+        console.log('Membership summary data:', membershipSummary)
+        if (membershipSummary) {
+          const sortedData = membershipSummary
+            .sort((a, b) => new Date(a.month) - new Date(b.month))
+            .map(m => ({
+              month: new Date(m.month).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
+              count: Number(m.ending_total) || 0
+            }))
+          setMembershipMonthlyData(sortedData)
         }
 
         // Fetch race finishers data from htc.v_race_finishers
