@@ -110,14 +110,16 @@ function Home() {
   const getRaceParticipationData = () => {
     if (!analyticsData.length) return []
     
-    // Group by race and get the last count of results for each unique race
+    console.log('Analytics data:', analyticsData.slice(0, 10))
+    
+    // Group by race_name and get the last count of results for each unique race
     const raceMap = new Map()
     analyticsData.forEach(r => {
-      const raceKey = r.race_id || r.race_name
+      const raceKey = r.race_name || 'Unknown'
       if (!raceMap.has(raceKey)) {
         raceMap.set(raceKey, r)
       } else {
-        // Keep the most recent entry (higher year or later in the array)
+        // Keep the most recent entry (higher year)
         const existing = raceMap.get(raceKey)
         if (r.year > existing.year) {
           raceMap.set(raceKey, r)
@@ -125,17 +127,19 @@ function Home() {
       }
     })
     
+    console.log('Unique races map:', Array.from(raceMap.keys()))
+    
     // Convert to array and map to include alias
     const uniqueRaces = Array.from(raceMap.values()).map(r => {
-      const race = racesData.find(race => 
-        race.race_id === r.race_id || race.name === r.race_name
-      )
+      const race = racesData.find(race => race.name === r.race_name)
       const alias = race?.alias || r.race_name?.substring(0, 15) + '...' || 'Unknown'
       return {
         name: alias,
         count: Number(r.registration_count) || 0
       }
     })
+    
+    console.log('Unique races:', uniqueRaces)
     
     // Sort by count and take top 5
     return uniqueRaces.sort((a, b) => b.count - a.count).slice(0, 5)
