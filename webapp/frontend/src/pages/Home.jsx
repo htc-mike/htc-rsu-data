@@ -45,10 +45,10 @@ function Home() {
           })))
         }
 
-        // Fetch results data from htc.results table with race information
+        // Fetch results data from htc.results table
         const { data: results, error: resultsError } = await supabase
           .from('results')
-          .select('race_id, races!inner(name, alias)')
+          .select('race_id')
         console.log('Results data:', results)
         console.log('Results error:', resultsError)
         setResultsData(results || [])
@@ -123,9 +123,9 @@ function Home() {
     
     // Convert to array and map to include alias
     const raceParticipation = Array.from(raceCountMap.entries()).map(([raceKey, count]) => {
-      // Use the races data from the join if available, otherwise fall back to racesData
-      const resultRace = resultsData.find(r => r.race_id === raceKey)
-      const alias = resultRace?.races?.alias || resultRace?.races?.name?.substring(0, 15) + '...' || raceKey?.substring(0, 15) + '...' || 'Unknown'
+      // Use racesData to get alias
+      const race = racesData.find(race => race.race_id === raceKey)
+      const alias = race?.alias || race?.name?.substring(0, 15) + '...' || raceKey?.substring(0, 15) + '...' || 'Unknown'
       return {
         name: alias,
         count: count
