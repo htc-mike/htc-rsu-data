@@ -37,13 +37,16 @@ function Finance() {
         setFilteredDetailData(detailData || [])
         setSummaryData(summaryData || [])
         
-        // Calculate KPIs
-        const currentBalance = detailData && detailData.length > 0 
-          ? Math.max(...detailData.map(d => d.balance || 0))
+        // Calculate KPIs for current year only
+        const currentYear = new Date().getFullYear()
+        const currentYearData = detailData ? detailData.filter(d => d.trans_year === currentYear) : []
+        
+        const currentBalance = currentYearData && currentYearData.length > 0
+          ? currentYearData[0].balance || 0  // First record is most recent (sorted DESC)
           : 0
-        const withdrawalsToDate = detailData ? detailData.reduce((sum, d) => sum + (d.withdrawal || 0), 0) : 0
-        const depositsToDate = detailData ? detailData.reduce((sum, d) => sum + (d.deposit || 0), 0) : 0
-        const transactionsToDate = detailData ? detailData.length : 0
+        const withdrawalsToDate = currentYearData ? currentYearData.reduce((sum, d) => sum + (d.withdrawal || 0), 0) : 0
+        const depositsToDate = currentYearData ? currentYearData.reduce((sum, d) => sum + (d.deposit || 0), 0) : 0
+        const transactionsToDate = currentYearData ? currentYearData.length : 0
         
         setKpiData({
           currentBalance,
