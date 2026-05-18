@@ -48,7 +48,7 @@ function Home() {
         // Fetch race finishers data from htc.v_race_finishers
         const { data: finishers, error: finishersError } = await supabase
           .from('v_race_finishers')
-          .select('race_id, race_name, year, finishers')
+          .select('*')
         console.log('Finishers data:', finishers)
         console.log('Finishers error:', finishersError)
         setResultsData(finishers || [])
