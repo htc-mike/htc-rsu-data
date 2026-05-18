@@ -16,8 +16,8 @@ function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch races data (total races count)
-        const { data: races } = await supabase.from('races').select('race_id, name, alias').limit(5)
+        // Fetch races data (for alias lookup)
+        const { data: races } = await supabase.from('races').select('race_id, name, alias')
         setRacesData(races || [])
 
         // Fetch memberships data (level distribution and active status)
@@ -110,10 +110,14 @@ function Home() {
   const getRaceParticipationData = () => {
     if (!analyticsData.length) return []
     
-    return analyticsData.slice(0, 5).map(r => ({
-      name: r.alias || r.race_name?.substring(0, 15) + '...' || 'Unknown',
-      count: Number(r.registration_count) || 0
-    }))
+    return analyticsData.slice(0, 5).map(r => {
+      const race = racesData.find(race => race.race_id === r.race_id)
+      const alias = race?.alias || r.race_name?.substring(0, 15) + '...' || 'Unknown'
+      return {
+        name: alias,
+        count: Number(r.registration_count) || 0
+      }
+    })
   }
 
   // Calculate registrations trend for line chart
