@@ -137,11 +137,21 @@ function Finance() {
 
   const getMonthTransactions = (monthData) => {
     if (!monthData) return []
-    const month = new Date(monthData.trans_date).getMonth()
     const year = monthData.trans_year
+    const monthName = monthData.trans_month
+    
+    // Map month names to month indices
+    const monthMap = {
+      'January': 0, 'February': 1, 'March': 2, 'April': 3,
+      'May': 4, 'June': 5, 'July': 6, 'August': 7,
+      'September': 8, 'October': 9, 'November': 10, 'December': 11
+    }
+    
+    const targetMonth = monthMap[monthName]
+    
     return detailData.filter(d => {
       const dMonth = new Date(d.trans_date).getMonth()
-      return dMonth === month && d.trans_year === year
+      return dMonth === targetMonth && d.trans_year === year
     })
   }
 
