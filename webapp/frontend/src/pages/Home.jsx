@@ -32,15 +32,12 @@ function Home() {
         console.log('Membership summary data:', membershipSummary)
         console.log('Membership summary error:', summaryError)
         if (membershipSummary) {
-          const twelveMonthsAgo = new Date()
-          twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12)
-          const sortedData = membershipSummary
-            .filter(m => new Date(m.month) >= twelveMonthsAgo)
-            .sort((a, b) => new Date(a.month) - new Date(b.month))
-            .map(m => ({
-              month: new Date(m.month).toLocaleDateString('en-US', { year: 'numeric', month: 'short' }),
-              count: Number(m.ending_total) || 0
-            }))
+          // Take the last 12 months of data (assuming it's ordered chronologically)
+          const last12Months = membershipSummary.slice(-12)
+          const sortedData = last12Months.map(m => ({
+            month: m.month,
+            count: Number(m.ending_total) || 0
+          }))
           setMembershipMonthlyData(sortedData)
         } else {
           console.error('Failed to load membership summary:', summaryError)
