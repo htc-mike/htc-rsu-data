@@ -109,7 +109,7 @@ function Finance() {
 
   // Prepare time series data
   const timeSeriesData = summaryData.map(item => ({
-    date: formatMonthYear(item.trans_date),
+    date: item.trans_month || formatMonthYear(item.trans_date),
     balance: item.balance || 0
   }))
 
@@ -186,34 +186,26 @@ function Finance() {
           <table className="w-full">
             <thead className="bg-[#0F172A]">
               <tr>
-                {summaryData.length > 0 && Object.keys(summaryData[0])
-                  .filter(key => key !== 'trans_date')
-                  .map(key => (
-                    <th key={key} className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">
-                      {key.replace(/_/g, ' ')}
-                    </th>
-                  ))}
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Month</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Year</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Balance</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Bank Balance</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Statement Balance</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#334155]">
               {summaryData.length === 0 ? (
                 <tr>
-                  <td colSpan="10" className="px-6 py-12 text-center text-[#94A3B8]">No summary data found</td>
+                  <td colSpan="5" className="px-6 py-12 text-center text-[#94A3B8]">No summary data found</td>
                 </tr>
               ) : (
                 summaryData.map((row, index) => (
                   <tr key={index} className="hover:bg-[#334155] transition-colors">
-                    {Object.entries(row)
-                      .filter(([key]) => key !== 'trans_date')
-                      .map(([key, value]) => (
-                        <td key={key} className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                          {key.includes('balance') || key.includes('deposit') || key.includes('withdrawal') 
-                            ? formatCurrency(value) 
-                            : key.includes('date') 
-                              ? formatDate(value)
-                              : value || 'N/A'}
-                        </td>
-                      ))}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{row.trans_month || formatDate(row.trans_date)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{row.trans_year}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatCurrency(row.balance)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatCurrency(row.bank_balance)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatCurrency(row.statement_balance)}</td>
                   </tr>
                 ))
               )}
@@ -244,30 +236,32 @@ function Finance() {
           <table className="w-full">
             <thead className="bg-[#0F172A]">
               <tr>
-                {detailData.length > 0 && Object.keys(detailData[0]).map(key => (
-                  <th key={key} className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">
-                    {key.replace(/_/g, ' ')}
-                  </th>
-                ))}
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Number</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">To/From</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Description</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Deposit</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Withdrawal</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Note</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Balance</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#334155]">
               {filteredDetailData.length === 0 ? (
                 <tr>
-                  <td colSpan="12" className="px-6 py-12 text-center text-[#94A3B8]">No transactions found</td>
+                  <td colSpan="8" className="px-6 py-12 text-center text-[#94A3B8]">No transactions found</td>
                 </tr>
               ) : (
                 filteredDetailData.map((row, index) => (
                   <tr key={index} className="hover:bg-[#334155] transition-colors">
-                    {Object.entries(row).map(([key, value]) => (
-                      <td key={key} className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                        {key.includes('balance') || key.includes('deposit') || key.includes('withdrawal') 
-                          ? formatCurrency(value) 
-                          : key.includes('date') 
-                            ? formatDate(value)
-                            : value !== null && value !== undefined ? value : 'N/A'}
-                      </td>
-                    ))}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{row.number || 'N/A'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatDate(row.trans_date)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{row.to_from || 'N/A'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{row.description || 'N/A'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatCurrency(row.deposit)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatCurrency(row.withdrawal)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{row.note || 'N/A'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatCurrency(row.balance)}</td>
                   </tr>
                 ))
               )}
