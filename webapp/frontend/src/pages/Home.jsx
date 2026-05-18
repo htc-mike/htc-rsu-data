@@ -111,7 +111,10 @@ function Home() {
     if (!analyticsData.length) return []
     
     return analyticsData.slice(0, 5).map(r => {
-      const race = racesData.find(race => race.race_id === r.race_id)
+      // Try to match by race_id first, then by race_name
+      const race = racesData.find(race => 
+        race.race_id === r.race_id || race.name === r.race_name
+      )
       const alias = race?.alias || r.race_name?.substring(0, 15) + '...' || 'Unknown'
       return {
         name: alias,
