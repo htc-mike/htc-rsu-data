@@ -8,6 +8,7 @@ function Home() {
   const [racesData, setRacesData] = useState([])
   const [membershipsData, setMembershipsData] = useState([])
   const [analyticsData, setAnalyticsData] = useState([])
+  const [currentBalance, setCurrentBalance] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -25,6 +26,15 @@ function Home() {
         // Fetch analytics data (race revenue summary)
         const { data: analytics } = await supabase.rpc('get_race_revenue')
         setAnalyticsData(analytics || [])
+
+        // Fetch current balance from finance data
+        const currentYear = new Date().getFullYear()
+        const { data: detailData } = await supabase.from('v_check_register_detail').select('*')
+        if (detailData) {
+          const currentYearData = detailData.filter(d => d.trans_year === currentYear)
+          currentYearData.sort((a, b) => new Date(b.trans_date) - new Date(a.trans_date))
+          setCurrentBalance(currentYearData.length > 0 ? currentYearData[0].balance : 0)
+        }
 
         setLoading(false)
       } catch (err) {
@@ -114,7 +124,7 @@ function Home() {
       <p className="text-xl text-[#94A3B8] mb-12">Your central hub for race data, membership management, and analytics</p>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
         <Link to="/races" className="card p-6 hover:scale-105 transition-transform cursor-pointer animate-fade-in" style={{ animationDelay: '0.1s' }}>
           <div className="flex items-center justify-between mb-4">
             <Trophy className="h-8 w-8 text-blue-400" />
@@ -133,7 +143,16 @@ function Home() {
           <p className="text-[#94A3B8]">{getActiveMemberCount()} active members</p>
         </Link>
 
-        <Link to="/analytics" className="card p-6 hover:scale-105 transition-transform cursor-pointer animate-fade-in" style={{ animationDelay: '0.3s' }}>
+        <Link to="/finance" className="card p-6 hover:scale-105 transition-transform cursor-pointer animate-fade-in" style={{ animationDelay: '0.3s' }}>
+          <div className="flex items-center justify-between mb-4">
+            <DollarSign className="h-8 w-8 text-purple-400" />
+            <ArrowRight className="h-5 w-5 text-[#94A3B8]" />
+          </div>
+          <h2 className="text-3xl font-bold text-white mb-2">Finance</h2>
+          <p className="text-[#94A3B8]">{formatCurrency(currentBalance)} balance</p>
+        </Link>
+
+        <Link to="/analytics" className="card p-6 hover:scale-105 transition-transform cursor-pointer animate-fade-in" style={{ animationDelay: '0.4s' }}>
           <div className="flex items-center justify-between mb-4">
             <BarChart3 className="h-8 w-8 text-orange-400" />
             <ArrowRight className="h-5 w-5 text-[#94A3B8]" />
@@ -228,14 +247,18 @@ function Home() {
       {/* Quick Actions */}
       <div className="card p-6 animate-slide-in">
         <h2 className="text-2xl font-bold text-white mb-6">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Link to="/" className="flex items-center justify-center p-4 bg-[#1E293B] hover:bg-[#334155] rounded-lg transition-colors group">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Link to="/races" className="flex items-center justify-center p-4 bg-[#1E293B] hover:bg-[#334155] rounded-lg transition-colors group">
             <Trophy className="h-6 w-6 text-blue-400 mr-3 group-hover:scale-110 transition-transform" />
             <span className="text-white font-medium">View Races</span>
           </Link>
           <Link to="/memberships" className="flex items-center justify-center p-4 bg-[#1E293B] hover:bg-[#334155] rounded-lg transition-colors group">
             <UserCheck className="h-6 w-6 text-green-400 mr-3 group-hover:scale-110 transition-transform" />
             <span className="text-white font-medium">Manage Memberships</span>
+          </Link>
+          <Link to="/finance" className="flex items-center justify-center p-4 bg-[#1E293B] hover:bg-[#334155] rounded-lg transition-colors group">
+            <DollarSign className="h-6 w-6 text-purple-400 mr-3 group-hover:scale-110 transition-transform" />
+            <span className="text-white font-medium">View Finance</span>
           </Link>
           <Link to="/analytics" className="flex items-center justify-center p-4 bg-[#1E293B] hover:bg-[#334155] rounded-lg transition-colors group">
             <BarChart3 className="h-6 w-6 text-orange-400 mr-3 group-hover:scale-110 transition-transform" />
