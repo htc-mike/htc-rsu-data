@@ -41,8 +41,11 @@ function Finance() {
         const currentYear = new Date().getFullYear()
         const currentYearData = detailData ? detailData.filter(d => d.trans_year === currentYear) : []
         
+        // Sort by trans_date DESC to get most recent first
+        currentYearData.sort((a, b) => new Date(b.trans_date) - new Date(a.trans_date))
+        
         const currentBalance = currentYearData && currentYearData.length > 0
-          ? currentYearData[0].balance || 0  // First record is most recent (sorted DESC)
+          ? currentYearData[0].balance || 0  // First record is most recent
           : 0
         const withdrawalsToDate = currentYearData ? currentYearData.reduce((sum, d) => sum + (d.withdrawal || 0), 0) : 0
         const depositsToDate = currentYearData ? currentYearData.reduce((sum, d) => sum + (d.deposit || 0), 0) : 0
