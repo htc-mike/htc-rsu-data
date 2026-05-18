@@ -133,9 +133,11 @@ function Home() {
     const uniqueRaces = Array.from(raceMap.values()).map(r => {
       const race = racesData.find(race => race.name === r.race_name)
       const alias = race?.alias || r.race_name?.substring(0, 15) + '...' || 'Unknown'
+      // Use participants if available, otherwise fall back to registration_count
+      const count = Number(r.participants) || Number(r.registration_count) || 0
       return {
         name: alias,
-        count: Number(r.registration_count) || 0
+        count: count
       }
     })
     
