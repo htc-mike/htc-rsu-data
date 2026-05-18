@@ -110,8 +110,23 @@ function Home() {
   const getRaceParticipationData = () => {
     if (!analyticsData.length) return []
     
-    return analyticsData.slice(0, 5).map(r => {
-      // Try to match by race_id first, then by race_name
+    // Group by race and get the last count of results for each unique race
+    const raceMap = new Map()
+    analyticsData.forEach(r => {
+      const raceKey = r.race_id || r.race_name
+      if (!raceMap.has(raceKey)) {
+        raceMap.set(raceKey, r)
+      } else {
+        // Keep the most recent entry (higher year or later in the array)
+        const existing = raceMap.get(raceKey)
+        if (r.year > existing.year) {
+          raceMap.set(raceKey, r)
+        }
+      }
+    })
+    
+    // Convert to array and map to include alias
+    const uniqueRaces = Array.from(raceMap.values()).map(r => {
       const race = racesData.find(race => 
         race.race_id === r.race_id || race.name === r.race_name
       )
@@ -121,6 +136,9 @@ function Home() {
         count: Number(r.registration_count) || 0
       }
     })
+    
+    // Sort by count and take top 5
+    return uniqueRaces.sort((a, b) => b.count - a.count).slice(0, 5)
   }
 
   // Calculate registrations trend for line chart
