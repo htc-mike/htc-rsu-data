@@ -158,8 +158,8 @@ function Home() {
       }
     })
     
-    // Sort by count and take top 5
-    return raceFinishers.sort((a, b) => b.count - a.count).slice(0, 5)
+    // Sort by count
+    return raceFinishers.sort((a, b) => b.count - a.count)
   }
 
   // Calculate registrations trend for line chart
