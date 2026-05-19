@@ -7,6 +7,18 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  const logAuthEvent = async (eventType, userData) => {
+    try {
+      await supabase.from('auth_logs').insert({
+        user_id: userData?.id,
+        event_type: eventType,
+        event_data: userData
+      })
+    } catch (error) {
+      console.error('Failed to log auth event:', error)
+    }
+  }
+
   useEffect(() => {
     // Check for tokens in localStorage from OAuth callback
     const accessToken = localStorage.getItem('sb-access-token')
@@ -31,7 +43,8 @@ export const AuthProvider = ({ children }) => {
     })
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      await logAuthEvent(event, session?.user)
       setUser(session?.user ?? null)
     })
 

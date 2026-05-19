@@ -17,12 +17,12 @@ TBL_REGISTRATIONS = 'htc.registrations'
 TBL_MEMBERS = 'htc.memberships'
 TBL_RESULTS = 'htc.results'
 
-REFRESH_EVENTS = False
+REFRESH_EVENTS = True
 REFRESH_REGISTRATIONS = False
 REFRESH_DONATIONS = False
 REFRESH_MEMBERS = False
 REFRESH_RESULTS = False
-RACE_ID = None
+RACE_ID = 172379
 
 def main():
 
@@ -37,7 +37,7 @@ def main():
     if REFRESH_EVENTS:
         update_race_events(rsu, db, race_id = RACE_ID)
 
-    # update_results(rsu, db,REFRESH_RESULTS)
+    update_results(rsu, db,REFRESH_RESULTS)
 
     update_user_registrations(rsu, db, refresh = REFRESH_REGISTRATIONS, race_id = RACE_ID)
     update_user_donations(rsu, db, refresh = REFRESH_DONATIONS, race_id = RACE_ID)

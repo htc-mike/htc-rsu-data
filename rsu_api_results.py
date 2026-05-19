@@ -31,7 +31,7 @@ def get_results_page(race_id, event_id, page = 1):
     entry = {}
     if r.ok:
         obj = json.loads(r.text)
-        # file_utils.write_json(f"data\\race_results_raw.json",obj)
+        # file_utils.write_json(f"data\\race_results_raw.{race_id}_{event_id}.json",obj)
         if len(obj)>0:
             if len(obj['individual_results_sets'])>0:
 
