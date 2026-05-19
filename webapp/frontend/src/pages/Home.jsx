@@ -189,8 +189,8 @@ function Home() {
 
   return (
     <div className="animate-fade-in">
-      <h1 className="text-5xl font-bold mb-4 text-white">Welcome to HTC Data Portal</h1>
-      <p className="text-xl text-[#94A3B8] mb-12">Your central hub for race data, membership management, and analytics</p>
+      <h1 className="text-5xl font-bold mb-4 text-white">Welcome to the HTC Data Portal</h1>
+      <p className="text-xl text-[#94A3B8] mb-12">Your central hub for race, membership and financial data for the Hartford Track Club.</p>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
