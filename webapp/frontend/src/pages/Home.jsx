@@ -29,7 +29,7 @@ function Home() {
         // Fetch membership summary data
         const { data: membershipSummary, error: summaryError } = await supabase
           .from('v_membership_summary')
-          .select('month, ending_total')
+          .select('month, ending_total, new')
         console.log('Membership summary data:', membershipSummary)
         console.log('Membership summary error:', summaryError)
         if (membershipSummary) {
@@ -37,7 +37,8 @@ function Home() {
           const last12Months = membershipSummary.slice(-12)
           const sortedData = last12Months.map(m => ({
             month: m.month,
-            count: Number(m.ending_total) || 0
+            ending_total: Number(m.ending_total) || 0,
+            new: Number(m.new) || 0
           }))
           setMembershipMonthlyData(sortedData)
         } else {
@@ -271,11 +272,18 @@ function Home() {
               />
               <Legend />
               <Line 
-                dataKey="count" 
-                stroke="#10b981" 
+                dataKey="ending_total"
+                stroke="#10b981"
                 strokeWidth={3}
                 dot={{ r: 6 }}
                 name="Memberships"
+              />
+              <Line
+                dataKey="new"
+                stroke="#3B82F6"
+                strokeWidth={3}
+                dot={{ r: 6 }}
+                name="New"
               />
             </LineChart>
           </ResponsiveContainer>
