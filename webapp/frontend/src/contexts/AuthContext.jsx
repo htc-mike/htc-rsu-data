@@ -43,9 +43,10 @@ export const AuthProvider = ({ children }) => {
     })
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      await logAuthEvent(event, session?.user)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null)
+      // Log auth event asynchronously (don't await to avoid blocking)
+      logAuthEvent(event, session?.user)
     })
 
     return () => subscription.unsubscribe()
