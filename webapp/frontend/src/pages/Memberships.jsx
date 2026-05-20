@@ -9,8 +9,8 @@ function Memberships() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [levelFilter, setLevelFilter] = useState('all')
-  const [membershipLevels, setMembershipLevels] = useState([])
+  const [subStatusFilter, setSubStatusFilter] = useState('all')
+  const [membershipSubStatuses, setMembershipSubStatuses] = useState([])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,9 +22,9 @@ function Memberships() {
         setMemberships(data || [])
         setFilteredMemberships(data || [])
         
-        // Extract unique membership levels
-        const levels = [...new Set(data?.map(m => m.club_membership_level_name).filter(Boolean))]
-        setMembershipLevels(levels)
+        // Extract unique membership sub-statuses
+        const subStatuses = [...new Set(data?.map(m => m.membership_sub_status).filter(Boolean))]
+        setMembershipSubStatuses(subStatuses)
         
         setLoading(false)
       } catch (err) {
@@ -43,20 +43,19 @@ function Memberships() {
     if (searchTerm) {
       const term = searchTerm.toLowerCase()
       filtered = filtered.filter(m => 
-        m.first_name?.toLowerCase().includes(term) ||
-        m.last_name?.toLowerCase().includes(term) ||
+        m.full_name?.toLowerCase().includes(term) ||
         m.email?.toLowerCase().includes(term) ||
-        m.club_member_num?.toString().includes(term)
+        m.membership_id?.toString().includes(term)
       )
     }
     
-    // Apply level filter
-    if (levelFilter !== 'all') {
-      filtered = filtered.filter(m => m.club_membership_level_name === levelFilter)
+    // Apply sub-status filter
+    if (subStatusFilter !== 'all') {
+      filtered = filtered.filter(m => m.membership_sub_status === subStatusFilter)
     }
     
     setFilteredMemberships(filtered)
-  }, [searchTerm, levelFilter, memberships])
+  }, [searchTerm, subStatusFilter, memberships])
 
   const formatCurrency = (amount) => {
     if (!amount) return '$0.00'
@@ -64,15 +63,6 @@ function Memberships() {
       style: 'currency',
       currency: 'USD'
     }).format(amount)
-  }
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return 'N/A'
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
   }
 
   // Calculate stats for graphs
@@ -213,7 +203,7 @@ function Memberships() {
             <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-[#94A3B8]" />
             <input
               type="text"
-              placeholder="Search by name, email, or member number..."
+              placeholder="Search by name, email, or membership ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-[#1E293B] border border-[#334155] rounded-lg text-white placeholder-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
@@ -222,13 +212,13 @@ function Memberships() {
           <div className="relative">
             <Filter className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-[#94A3B8]" />
             <select
-              value={levelFilter}
-              onChange={(e) => setLevelFilter(e.target.value)}
+              value={subStatusFilter}
+              onChange={(e) => setSubStatusFilter(e.target.value)}
               className="pl-10 pr-4 py-2 bg-[#1E293B] border border-[#334155] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none cursor-pointer"
             >
-              <option value="all">All Levels</option>
-              {membershipLevels.map(level => (
-                <option key={level} value={level}>{level}</option>
+              <option value="all">All Sub-Statuses</option>
+              {membershipSubStatuses.map(subStatus => (
+                <option key={subStatus} value={subStatus}>{subStatus}</option>
               ))}
             </select>
           </div>
@@ -241,13 +231,13 @@ function Memberships() {
           <table className="w-full">
             <thead className="bg-[#0F172A]">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Member #</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Name</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Membership ID</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Full Name</th>
                 <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Membership Level</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Start Date</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">End Date</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Amount Paid</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Age</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Gender</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">City/State</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Sub-Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#334155]">
@@ -259,25 +249,25 @@ function Memberships() {
                 filteredMemberships.map((member, index) => (
                   <tr key={member.membership_id || index} className="hover:bg-[#334155] transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-                      {member.club_member_num || 'N/A'}
+                      {member.membership_id || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                      {member.first_name} {member.middle_name} {member.last_name}
+                      {member.full_name || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[#94A3B8]">
                       {member.email || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                      {member.club_membership_level_name || 'N/A'}
+                      {member.age || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[#94A3B8]">
-                      {formatDate(member.membership_start)}
+                      {member.gender || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[#94A3B8]">
-                      {formatDate(member.membership_end)}
+                      {member.city_state || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-                      {formatCurrency(member.amount_paid)}
+                      {member.membership_sub_status || 'N/A'}
                     </td>
                   </tr>
                 ))
