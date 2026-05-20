@@ -21,12 +21,7 @@ function Memberships() {
         setMemberships(data || [])
         
         // Extract unique membership sub-statuses
-        const subStatuses = Object.values((data || []).reduce((statuses, membership) => {
-          const label = getSubStatus(membership)
-          const value = getSubStatusKey(membership)
-          statuses[value] = statuses[value] || { value, label }
-          return statuses
-        }, {})).sort((a, b) => a.label.localeCompare(b.label))
+        const subStatuses = [...new Set((data || []).map(m => getSubStatus(m)))].sort()
         setMembershipSubStatuses(subStatuses)
         
         setLoading(false)
@@ -44,10 +39,6 @@ function Memberships() {
     return subStatus || 'Unknown'
   }
 
-  const getSubStatusKey = (membership) => {
-    return getSubStatus(membership).toLowerCase()
-  }
-
   const filteredMemberships = (() => {
     let filtered = memberships
     
@@ -63,7 +54,7 @@ function Memberships() {
     
     // Apply sub-status filter
     if (subStatusFilter !== 'all') {
-      filtered = filtered.filter(m => getSubStatusKey(m) === subStatusFilter)
+      filtered = filtered.filter(m => getSubStatus(m) === subStatusFilter)
     }
     
     return filtered
@@ -230,9 +221,12 @@ function Memberships() {
             >
               <option value="all">All Sub-Statuses</option>
               {membershipSubStatuses.map(subStatus => (
-                <option key={subStatus.value} value={subStatus.value}>{subStatus.label}</option>
+                <option key={subStatus} value={subStatus}>{subStatus}</option>
               ))}
             </select>
+          </div>
+          <div className="text-sm text-[#94A3B8] whitespace-nowrap">
+            Showing {filteredMemberships.length} of {memberships.length}
           </div>
         </div>
       </div>
