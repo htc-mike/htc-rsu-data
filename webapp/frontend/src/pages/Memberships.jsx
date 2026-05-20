@@ -240,6 +240,16 @@ function Memberships() {
 
       {/* Search and Filter */}
       <div className="card p-6 mb-6 animate-slide-in">
+        <div className="flex justify-end mb-4">
+          <button
+            type="button"
+            onClick={exportToCsv}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-all"
+          >
+            <Download className="h-4 w-4" />
+            Export CSV
+          </button>
+        </div>
         <div className="flex gap-4 items-center">
           <div className="flex-1 relative">
             <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-[#94A3B8]" />
@@ -267,14 +277,6 @@ function Memberships() {
           <div className="text-sm text-[#94A3B8] whitespace-nowrap">
             Showing {filteredMemberships.length} of {memberships.length}
           </div>
-          <button
-            type="button"
-            onClick={exportToCsv}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-all"
-          >
-            <Download className="h-4 w-4" />
-            Export CSV
-          </button>
         </div>
       </div>
 
