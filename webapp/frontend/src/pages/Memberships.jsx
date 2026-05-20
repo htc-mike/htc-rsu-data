@@ -23,7 +23,7 @@ function Memberships() {
         setFilteredMemberships(data || [])
         
         // Extract unique membership sub-statuses
-        const subStatuses = [...new Set(data?.map(m => m.membership_sub_status).filter(Boolean))]
+        const subStatuses = [...new Set(data?.map(m => getSubStatus(m)).filter(Boolean))].sort()
         setMembershipSubStatuses(subStatuses)
         
         setLoading(false)
@@ -35,6 +35,11 @@ function Memberships() {
     }
     fetchData()
   }, [])
+
+  const getSubStatus = (membership) => {
+    const subStatus = membership.membership_sub_status?.toString().trim()
+    return subStatus || 'Unknown'
+  }
 
   useEffect(() => {
     let filtered = memberships
@@ -51,7 +56,7 @@ function Memberships() {
     
     // Apply sub-status filter
     if (subStatusFilter !== 'all') {
-      filtered = filtered.filter(m => m.membership_sub_status === subStatusFilter)
+      filtered = filtered.filter(m => getSubStatus(m) === subStatusFilter)
     }
     
     setFilteredMemberships(filtered)
@@ -74,7 +79,7 @@ function Memberships() {
     // Members by sub-status
     const subStatusCounts = {}
     memberships.forEach(m => {
-      const subStatus = m.membership_sub_status || 'Unknown'
+      const subStatus = getSubStatus(m)
       subStatusCounts[subStatus] = (subStatusCounts[subStatus] || 0) + 1
     })
     
@@ -267,7 +272,7 @@ function Memberships() {
                       {member.city_state || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-                      {member.membership_sub_status || 'N/A'}
+                      {getSubStatus(member)}
                     </td>
                   </tr>
                 ))
