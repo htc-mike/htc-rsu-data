@@ -5,7 +5,6 @@ import { supabase } from '../supabaseClient.js'
 
 function Memberships() {
   const [memberships, setMemberships] = useState([])
-  const [filteredMemberships, setFilteredMemberships] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
@@ -20,7 +19,6 @@ function Memberships() {
         if (error) throw error
         
         setMemberships(data || [])
-        setFilteredMemberships(data || [])
         
         // Extract unique membership sub-statuses
         const subStatuses = Object.values((data || []).reduce((statuses, membership) => {
@@ -50,7 +48,7 @@ function Memberships() {
     return getSubStatus(membership).toLowerCase()
   }
 
-  useEffect(() => {
+  const filteredMemberships = (() => {
     let filtered = memberships
     
     // Apply search filter
@@ -68,8 +66,8 @@ function Memberships() {
       filtered = filtered.filter(m => getSubStatusKey(m) === subStatusFilter)
     }
     
-    setFilteredMemberships(filtered)
-  }, [searchTerm, subStatusFilter, memberships])
+    return filtered
+  })()
 
   const formatCurrency = (amount) => {
     if (!amount) return '$0.00'
