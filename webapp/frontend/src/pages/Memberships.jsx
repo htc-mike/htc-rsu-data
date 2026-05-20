@@ -68,6 +68,15 @@ function Memberships() {
     }).format(amount)
   }
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'N/A'
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+
   // Calculate stats for graphs
   const calculateStats = () => {
     const totalMembers = memberships.length
@@ -243,13 +252,14 @@ function Memberships() {
                 <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Age</th>
                 <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Gender</th>
                 <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">City/State</th>
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Membership End</th>
                 <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Sub-Status</th>
               </tr>
             </thead>
             <tbody key={`${subStatusFilter}-${searchTerm}`} className="divide-y divide-[#334155]">
               {filteredMemberships.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-12 text-center text-[#94A3B8]">No memberships found</td>
+                  <td colSpan="8" className="px-6 py-12 text-center text-[#94A3B8]">No memberships found</td>
                 </tr>
               ) : (
                 filteredMemberships.map((member, index) => (
@@ -271,6 +281,9 @@ function Memberships() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[#94A3B8]">
                       {member.city_state || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#94A3B8]">
+                      {formatDate(member.membership_end)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
                       {getSubStatus(member)}
