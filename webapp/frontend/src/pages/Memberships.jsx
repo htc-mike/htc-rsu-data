@@ -8,7 +8,7 @@ function Memberships() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [subStatusFilter, setSubStatusFilter] = useState('all')
+  const [subStatusFilter, setSubStatusFilter] = useState('Active')
   const [membershipSubStatuses, setMembershipSubStatuses] = useState([])
 
   useEffect(() => {
