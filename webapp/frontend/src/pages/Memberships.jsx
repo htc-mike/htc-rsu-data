@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { Users, DollarSign, Calendar, Search, Filter } from 'lucide-react'
+import { Users, DollarSign, Calendar, Search, Filter, Download } from 'lucide-react'
 import { supabase } from '../supabaseClient.js'
 
 function Memberships() {
@@ -75,6 +75,36 @@ function Memberships() {
       month: 'short',
       day: 'numeric'
     })
+  }
+
+  const exportToCsv = () => {
+    const columns = [
+      ['Membership ID', 'membership_id'],
+      ['Full Name', 'full_name'],
+      ['Email', 'email'],
+      ['Age', 'age'],
+      ['Gender', 'gender'],
+      ['City/State', 'city_state'],
+      ['Membership End', 'membership_end'],
+      ['Sub-Status', 'membership_sub_status']
+    ]
+    const escapeCsvValue = (value) => {
+      const stringValue = value === null || value === undefined || value === '' ? 'N/A' : value.toString()
+      return `"${stringValue.replace(/"/g, '""')}"`
+    }
+    const rows = filteredMemberships.map(member => columns.map(([label, key]) => {
+      if (key === 'membership_end') return escapeCsvValue(formatDate(member.membership_end))
+      if (key === 'membership_sub_status') return escapeCsvValue(getSubStatus(member))
+      return escapeCsvValue(member[key])
+    }).join(','))
+    const csv = [columns.map(([label]) => escapeCsvValue(label)).join(','), ...rows].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `memberships-${new Date().toISOString().slice(0, 10)}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
   }
 
   // Calculate stats for graphs
@@ -237,6 +267,14 @@ function Memberships() {
           <div className="text-sm text-[#94A3B8] whitespace-nowrap">
             Showing {filteredMemberships.length} of {memberships.length}
           </div>
+          <button
+            type="button"
+            onClick={exportToCsv}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-all"
+          >
+            <Download className="h-4 w-4" />
+            Export CSV
+          </button>
         </div>
       </div>
 
