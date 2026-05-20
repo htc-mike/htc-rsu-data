@@ -81,16 +81,16 @@ function Memberships() {
     const totalRevenue = memberships.reduce((sum, m) => sum + (m.amount_paid || 0), 0)
     const avgCost = totalMembers > 0 ? totalRevenue / totalMembers : 0
     
-    // Members by level
-    const levelCounts = {}
+    // Members by sub-status
+    const subStatusCounts = {}
     memberships.forEach(m => {
-      const level = m.club_membership_level_name || 'Unknown'
-      levelCounts[level] = (levelCounts[level] || 0) + 1
+      const subStatus = m.membership_sub_status || 'Unknown'
+      subStatusCounts[subStatus] = (subStatusCounts[subStatus] || 0) + 1
     })
     
-    const levelData = Object.keys(levelCounts).map(level => ({
-      name: level,
-      value: levelCounts[level]
+    const subStatusData = Object.keys(subStatusCounts).map(subStatus => ({
+      name: subStatus,
+      value: subStatusCounts[subStatus]
     }))
     
     // Members by year (based on membership_start)
@@ -111,7 +111,7 @@ function Memberships() {
       totalMembers,
       totalRevenue,
       avgCost,
-      levelData,
+      subStatusData,
       yearData
     }
   }
@@ -162,11 +162,11 @@ function Memberships() {
       {/* Charts */}
       <div className="flex gap-6 mb-8 animate-slide-in">
         <div className="card p-6 flex-1">
-          <h2 className="text-2xl font-bold text-white mb-4">Members by Level</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">Members by Sub-Status</h2>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
-                data={stats.levelData}
+                data={stats.subStatusData}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
@@ -175,7 +175,7 @@ function Memberships() {
                 fill="#8884d8"
                 dataKey="value"
               >
-                {stats.levelData.map((entry, index) => (
+                {stats.subStatusData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
