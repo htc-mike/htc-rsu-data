@@ -101,8 +101,9 @@ function Memberships() {
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
+    const statusSlug = subStatusFilter === 'all' ? 'all' : subStatusFilter.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
     link.href = url
-    link.download = `memberships-${new Date().toISOString().slice(0, 10)}.csv`
+    link.download = `memberships-${statusSlug}-${new Date().toISOString().slice(0, 10)}.csv`
     link.click()
     URL.revokeObjectURL(url)
   }
