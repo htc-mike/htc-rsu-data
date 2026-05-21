@@ -175,7 +175,7 @@ function Finance() {
         <div className="card p-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-[#94A3B8]">Withdrawals to Date</p>
+              <p className="text-sm text-[#94A3B8]">Withdrawals ({new Date().getFullYear()})</p>
               <p className="text-3xl font-bold text-white">{formatCurrency(kpiData?.withdrawalsToDate)}</p>
             </div>
             <TrendingDown className="h-8 w-8 text-red-400" />
@@ -184,7 +184,7 @@ function Finance() {
         <div className="card p-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-[#94A3B8]">Deposits to Date</p>
+              <p className="text-sm text-[#94A3B8]">Deposits ({new Date().getFullYear()})</p>
               <p className="text-3xl font-bold text-white">{formatCurrency(kpiData?.depositsToDate)}</p>
             </div>
             <TrendingUp className="h-8 w-8 text-green-400" />
@@ -193,7 +193,7 @@ function Finance() {
         <div className="card p-6 animate-fade-in" style={{ animationDelay: '0.4s' }}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-[#94A3B8]">Transactions to Date</p>
+              <p className="text-sm text-[#94A3B8]">Transactions ({new Date().getFullYear()})</p>
               <p className="text-3xl font-bold text-white">{formatNumber(kpiData?.transactionsToDate)}</p>
             </div>
             <Activity className="h-8 w-8 text-orange-400" />
