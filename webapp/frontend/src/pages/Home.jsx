@@ -257,7 +257,7 @@ function Home() {
         {/* Membership Levels by Month */}
         <div className="card p-6 animate-slide-in">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-white">Membership Levels</h2>
+            <h2 className="text-2xl font-bold text-white">Member Levels</h2>
             <UserCheck className="h-6 w-6 text-green-400" />
           </div>
           <ResponsiveContainer width="100%" height={250}>
@@ -276,7 +276,7 @@ function Home() {
                 stroke="#10b981"
                 strokeWidth={3}
                 dot={{ r: 6 }}
-                name="Memberships"
+                name="Members"
               />
               <Line
                 dataKey="new"
