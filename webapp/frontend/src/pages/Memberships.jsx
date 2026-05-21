@@ -212,23 +212,26 @@ function Memberships() {
         return summaryMonth === monthKey
       })
       
-      // Debug: log matching
-      console.log(`Month ${monthKey} (${monthLabel}):`, monthSummary)
+      // Skip months with no data
+      if (!monthSummary) continue
       
       // Handle NULL values - treat all as 0
       // Using the actual field names from the view
-      const newCount = monthSummary ? (monthSummary.new ?? 0) : 0
-      const lapsedCount = monthSummary ? (monthSummary.lapsed ?? 0) : 0
-      const expiredCount = monthSummary ? (monthSummary.expired ?? 0) : 0
-      const renewalCount = monthSummary ? (monthSummary.renewed ?? 0) : 0
-      const advancedCount = monthSummary ? (monthSummary.advanced ?? 0) : 0
+      const newCount = monthSummary.new ?? 0
+      const lapsedCount = monthSummary.lapsed ?? 0
+      const expiredCount = monthSummary.expired ?? 0
+      const renewalCount = monthSummary.renewed ?? 0
+      const advancedCount = monthSummary.advanced ?? 0
       
-      memberChangesData.push({
-        month: monthLabel,
-        'New-Lapsed': newCount + lapsedCount,
-        'Expired': expiredCount,
-        'Renewal': renewalCount + advancedCount
-      })
+      // Only add if there's actual data (not all zeros)
+      if (newCount > 0 || lapsedCount > 0 || expiredCount > 0 || renewalCount > 0 || advancedCount > 0) {
+        memberChangesData.push({
+          month: monthLabel,
+          'New-Lapsed': newCount + lapsedCount,
+          'Expired': expiredCount,
+          'Renewal': renewalCount + advancedCount
+        })
+      }
     }
     
     return {
