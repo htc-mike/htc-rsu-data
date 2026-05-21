@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts'
 import { Users, DollarSign, Calendar, Search, Filter, Download, List } from 'lucide-react'
 import { supabase } from '../supabaseClient.js'
 
 function Memberships() {
   const [memberships, setMemberships] = useState([])
+  const [membershipSummary, setMembershipSummary] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
@@ -15,15 +16,22 @@ function Memberships() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data, error } = await supabase.from('v_memberships').select('*')
+        const { data: membershipData, error: membershipError } = await supabase.from('v_memberships').select('*')
         
-        if (error) throw error
+        if (membershipError) throw membershipError
         
-        setMemberships(data || [])
+        setMemberships(membershipData || [])
         
         // Extract unique membership sub-statuses
-        const subStatuses = [...new Set((data || []).map(m => getSubStatus(m)))].sort()
+        const subStatuses = [...new Set((membershipData || []).map(m => getSubStatus(m)))].sort()
         setMembershipSubStatuses(subStatuses)
+        
+        // Fetch membership summary data
+        const { data: summaryData, error: summaryError } = await supabase.from('v_membership_summary').select('*')
+        
+        if (summaryError) throw summaryError
+        
+        setMembershipSummary(summaryData || [])
         
         setLoading(false)
       } catch (err) {
@@ -184,26 +192,37 @@ function Memberships() {
       value: divisionCounts[division]
     }))
     
-    // Members by year (based on membership_start)
-    const yearCounts = {}
-    memberships.forEach(m => {
-      if (m.membership_start) {
-        const year = Number(m.membership_start.split('T')[0].split('-')[0])
-        yearCounts[year] = (yearCounts[year] || 0) + 1
-      }
-    })
+    // Member Changes by month (last 12 months)
+    const memberChangesData = []
+    const now = new Date()
     
-    const yearData = Object.keys(yearCounts).sort().map(year => ({
-      year: parseInt(year),
-      members: yearCounts[year]
-    }))
+    // Get last 12 months of data
+    for (let i = 11; i >= 0; i--) {
+      const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const monthYear = monthDate.toLocaleString('default', { month: 'short', year: 'numeric' })
+      const monthKey = monthDate.toISOString().slice(0, 7) // YYYY-MM format
+      
+      // Find matching summary record for this month
+      const monthSummary = membershipSummary.find(s => {
+        if (!s.month) return false
+        const summaryMonth = s.month.slice(0, 7) // Extract YYYY-MM
+        return summaryMonth === monthKey
+      })
+      
+      memberChangesData.push({
+        month: monthYear,
+        'New-Lapsed': monthSummary ? (monthSummary.new || 0) + (monthSummary.lapsed || 0) : 0,
+        'Expired': monthSummary ? (monthSummary.expired || 0) : 0,
+        'Renewal': monthSummary ? (monthSummary.renewal || 0) + (monthSummary.advanced || 0) : 0
+      })
+    }
     
     return {
       activeMembers,
       totalRevenue,
       totalMemberships,
       divisionData,
-      yearData
+      memberChangesData
     }
   }
 
@@ -280,19 +299,21 @@ function Memberships() {
         </div>
 
         <div className="card p-6 flex-1">
-          <h2 className="text-2xl font-bold text-white mb-4">New Members by Year</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">Member Changes</h2>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={stats.yearData}>
+            <LineChart data={stats.memberChangesData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="year" stroke="#94A3B8" fill="#94A3B8" />
+              <XAxis dataKey="month" stroke="#94A3B8" fill="#94A3B8" />
               <YAxis stroke="#94A3B8" fill="#94A3B8" />
               <Tooltip 
                 contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '8px' }}
                 itemStyle={{ color: '#F8FAFC' }}
               />
               <Legend />
-              <Bar dataKey="members" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-            </BarChart>
+              <Line type="monotone" dataKey="New-Lapsed" stroke="#3B82F6" strokeWidth={2} dot={{ r: 4 }} />
+              <Line type="monotone" dataKey="Expired" stroke="#EF4444" strokeWidth={2} dot={{ r: 4 }} />
+              <Line type="monotone" dataKey="Renewal" stroke="#10B981" strokeWidth={2} dot={{ r: 4 }} />
+            </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
