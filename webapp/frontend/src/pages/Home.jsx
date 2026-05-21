@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts'
-import { Trophy, UserCheck, BarChart3, ArrowRight, Calendar, Users, DollarSign, TrendingUp } from 'lucide-react'
+import { Trophy, UserCheck, BarChart3, ArrowRight, Calendar, Users, DollarSign, TrendingUp, Medal } from 'lucide-react'
 import { supabase } from '../supabaseClient.js'
 
 function Home() {
