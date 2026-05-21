@@ -46,7 +46,7 @@ function Finance() {
         const currentYearData = detailData ? detailData.filter(d => d.trans_year === currentYear) : []
         
         // Sort by trans_date DESC to get most recent first
-        currentYearData.sort((a, b) => new Date(b.trans_date) - new Date(a.trans_date))
+        currentYearData.sort((a, b) => b.trans_date.localeCompare(a.trans_date))
         
         const currentBalance = currentYearData && currentYearData.length > 0
           ? currentYearData[0].balance || 0  // First record is most recent
@@ -120,21 +120,12 @@ function Finance() {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return 'N/A'
-    const [year, month, day] = dateStr.split('T')[0].split('-').map(Number)
-    return new Date(year, month - 1, day).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
+    return dateStr.split('T')[0]
   }
 
   const formatMonthYear = (dateStr) => {
     if (!dateStr) return ''
-    const [year, month] = dateStr.split('T')[0].split('-').map(Number)
-    return new Date(year, month - 1, 1).toLocaleDateString('en-US', {
-      year: '2-digit',
-      month: 'short'
-    })
+    return dateStr.split('T')[0]
   }
 
   const getMonthTransactions = (monthData) => {

@@ -88,7 +88,7 @@ function Memberships() {
 
   const getSortIndicator = (key) => {
     if (sortConfig.key !== key) return ''
-    return sortConfig.direction === 'asc' ? ' ↑' : ' ↓'
+    return sortConfig.direction === 'asc' ? ' â†‘' : ' â†“'
   }
 
   const renderSortableHeader = (key, label) => (
@@ -113,11 +113,7 @@ function Memberships() {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return 'N/A'
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
+    return dateStr.split('T')[0]
   }
 
   const exportToCsv = () => {
@@ -175,7 +171,7 @@ function Memberships() {
     const yearCounts = {}
     memberships.forEach(m => {
       if (m.membership_start) {
-        const year = new Date(m.membership_start).getFullYear()
+        const year = Number(m.membership_start.split('T')[0].split('-')[0])
         yearCounts[year] = (yearCounts[year] || 0) + 1
       }
     })

@@ -37,7 +37,7 @@ function Registrations() {
         
         // Flatten the data structure and calculate age
         const flattenedData = data.map(item => {
-          const age = item.users?.dob ? new Date().getFullYear() - new Date(item.users.dob).getFullYear() : null
+          const age = item.users?.dob ? new Date().getFullYear() - Number(item.users.dob.split('T')[0].split('-')[0]) : null
           return {
             registration_id: item.registration_id,
             user_id: item.user_id,
@@ -87,11 +87,7 @@ function Registrations() {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return 'N/A'
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
+    return dateStr.split('T')[0]
   }
 
   const formatCurrency = (amount) => {
@@ -107,7 +103,7 @@ function Registrations() {
 
   const eventName = registrations.length > 0 ? registrations[0].event_name : null
   const eventYear = registrations.length > 0 && registrations[0].event_start_time 
-    ? new Date(registrations[0].event_start_time).getFullYear() 
+    ? registrations[0].event_start_time.split('T')[0].split('-')[0]
     : null
 
   return (

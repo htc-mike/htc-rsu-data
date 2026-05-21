@@ -95,12 +95,7 @@ function RaceDetail() {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return 'TBD'
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
+    return dateStr.split('T')[0]
   }
 
   const formatCurrency = (amount) => {
@@ -216,7 +211,7 @@ function RaceDetail() {
   const sortedEvents = [...events].sort((a, b) => {
     if (!a.start_time) return 1
     if (!b.start_time) return -1
-    return new Date(b.start_time) - new Date(a.start_time)
+    return b.start_time.localeCompare(a.start_time)
   })
 
   // Group events by date

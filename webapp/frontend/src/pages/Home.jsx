@@ -65,9 +65,12 @@ function Home() {
           const twelveMonthsAgo = new Date()
           twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12)
           const filteredData = summaryData
-            .filter(s => new Date(s.trans_date) >= twelveMonthsAgo)
+            .filter(s => {
+              const [year, month, day] = s.trans_date.split('T')[0].split('-').map(Number)
+              return new Date(year, month - 1, day) >= twelveMonthsAgo
+            })
             .map(s => ({
-              date: new Date(s.trans_date).toLocaleDateString('en-US', { year: '2-digit', month: 'short' }),
+              date: s.trans_date.split('T')[0],
               balance: s.balance || 0
             }))
           setBalanceOverTimeData(filteredData)
@@ -78,7 +81,7 @@ function Home() {
         const { data: detailData } = await supabase.from('v_check_register_detail').select('*')
         if (detailData) {
           const currentYearData = detailData.filter(d => d.trans_year === currentYear)
-          currentYearData.sort((a, b) => new Date(b.trans_date) - new Date(a.trans_date))
+          currentYearData.sort((a, b) => b.trans_date.localeCompare(a.trans_date))
           setCurrentBalance(currentYearData.length > 0 ? currentYearData[0].balance : 0)
         }
 
@@ -111,7 +114,8 @@ function Home() {
     const now = new Date()
     return membershipsData.filter(m => {
       if (!m.membership_end) return true // No end date means active
-      const endDate = new Date(m.membership_end)
+      const [year, month, day] = m.membership_end.split('T')[0].split('-').map(Number)
+      const endDate = new Date(year, month - 1, day)
       return endDate >= now
     }).length
   }

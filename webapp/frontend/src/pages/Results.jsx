@@ -74,11 +74,7 @@ function Results() {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return 'N/A'
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
+    return dateStr.split('T')[0]
   }
 
   if (loading) return <div className="text-center py-12 text-[#94A3B8] animate-fade-in">Loading results...</div>
@@ -86,7 +82,7 @@ function Results() {
 
   const eventName = results.length > 0 ? results[0].event_name : null
   const eventYear = results.length > 0 && results[0].event_start_time 
-    ? new Date(results[0].event_start_time).getFullYear() 
+    ? results[0].event_start_time.split('T')[0].split('-')[0]
     : null
 
   return (
