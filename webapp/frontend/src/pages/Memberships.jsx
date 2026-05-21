@@ -196,28 +196,38 @@ function Memberships() {
     const memberChangesData = []
     const now = new Date()
     
+    // Debug: log the summary data structure
+    console.log('Membership summary data:', membershipSummary)
+    
     // Get last 12 months of data
     for (let i = 11; i >= 0; i--) {
       const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1)
-      const monthYear = monthDate.toLocaleString('default', { month: 'short', year: 'numeric' })
+      const monthLabel = monthDate.toLocaleString('default', { month: 'short' })
       const monthKey = monthDate.toISOString().slice(0, 7) // YYYY-MM format
       
-      // Find matching summary record for this month
+      // Find matching summary record for this month - more flexible matching
       const monthSummary = membershipSummary.find(s => {
-        if (!s.month) return false
-        const summaryMonth = s.month.slice(0, 7) // Extract YYYY-MM
+        if (!s) return false
+        // Try different possible field names for month/date
+        const summaryDate = s.month || s.date || s.month_date || s.summary_month
+        if (!summaryDate) return false
+        
+        const summaryMonth = summaryDate.toString().slice(0, 7) // Extract YYYY-MM
         return summaryMonth === monthKey
       })
       
-      // Handle NULL values - treat all as 0
-      const newCount = monthSummary ? (monthSummary.new ?? 0) : 0
-      const lapsedCount = monthSummary ? (monthSummary.lapsed ?? 0) : 0
-      const expiredCount = monthSummary ? (monthSummary.expired ?? 0) : 0
-      const renewalCount = monthSummary ? (monthSummary.renewal ?? 0) : 0
-      const advancedCount = monthSummary ? (monthSummary.advanced ?? 0) : 0
+      // Debug: log matching
+      console.log(`Month ${monthKey} (${monthLabel}):`, monthSummary)
+      
+      // Handle NULL values - treat all as 0, try different field names
+      const newCount = monthSummary ? (monthSummary.new ?? monthSummary.New ?? monthSummary.NEW ?? 0) : 0
+      const lapsedCount = monthSummary ? (monthSummary.lapsed ?? monthSummary.Lapsed ?? monthSummary.LAPSED ?? 0) : 0
+      const expiredCount = monthSummary ? (monthSummary.expired ?? monthSummary.Expired ?? monthSummary.EXPIRED ?? 0) : 0
+      const renewalCount = monthSummary ? (monthSummary.renewal ?? monthSummary.Renewal ?? monthSummary.RENEWAL ?? 0) : 0
+      const advancedCount = monthSummary ? (monthSummary.advanced ?? monthSummary.Advanced ?? monthSummary.ADVANCED ?? 0) : 0
       
       memberChangesData.push({
-        month: monthYear,
+        month: monthLabel,
         'New-Lapsed': newCount + lapsedCount,
         'Expired': expiredCount,
         'Renewal': renewalCount + advancedCount
