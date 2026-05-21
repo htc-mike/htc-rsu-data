@@ -18,7 +18,7 @@ function MemberResults() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data, error } = await supabase.from('v_member_results').select('*', { count: 'exact' }).range(0, 99999)
+        const { data, error } = await supabase.from('v_member_results').select('*').limit(100000)
         
         if (error) throw error
         
