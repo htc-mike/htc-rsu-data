@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, Filter, Calendar, Trophy, Users, MapPin, Ruler, ChevronDown, ChevronRight, SportShoe, SquareSquare } from 'lucide-react'
+import { Search, Filter, Calendar, Trophy, Users, MapPin, Ruler, ChevronDown, ChevronRight, Shoe, Square } from 'lucide-react'
 import { supabase } from '../supabaseClient.js'
 
 function MemberResults() {
@@ -372,7 +372,7 @@ function MemberResults() {
                         <span className="text-white font-medium">{eventGroup.event_date}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <SquareSquare className="h-5 w-5 text-purple-400" />
+                        <Square className="h-5 w-5 text-purple-400" />
                         {eventGroup.url ? (
                           <a
                             href={eventGroup.url}
@@ -422,7 +422,7 @@ function MemberResults() {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-6">
                                 <div className="flex items-center gap-2">
-                                  <SportShoe className="h-5 w-5 text-yellow-400" />
+                                  <Shoe className="h-5 w-5 text-yellow-400" />
                                   <span className="text-white font-bold">{raceGroup.race}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
