@@ -339,9 +339,9 @@ function Home() {
             <DollarSign className="h-6 w-6 text-purple-400 mr-3 group-hover:scale-110 transition-transform" />
             <span className="text-white font-medium">View Finance</span>
           </Link>
-          <Link to="/analytics" className="flex items-center justify-center p-4 bg-[#1E293B] hover:bg-[#334155] rounded-lg transition-colors group">
-            <BarChart3 className="h-6 w-6 text-orange-400 mr-3 group-hover:scale-110 transition-transform" />
-            <span className="text-white font-medium">View Analytics</span>
+          <Link to="/member-results" className="flex items-center justify-center p-4 bg-[#1E293B] hover:bg-[#334155] rounded-lg transition-colors group">
+            <Medal className="h-6 w-6 text-orange-400 mr-3 group-hover:scale-110 transition-transform" />
+            <span className="text-white font-medium">View Member Results</span>
           </Link>
         </div>
       </div>

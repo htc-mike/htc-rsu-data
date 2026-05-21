@@ -342,8 +342,12 @@ function MemberResults() {
                             href={eventGroup.race_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-white font-bold hover:text-blue-400 transition-colors flex items-center gap-1"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              e.preventDefault()
+                              handleEventClick(eventKey)
+                            }}
+                            className="text-white font-bold hover:text-blue-400 transition-colors flex items-center gap-1 cursor-pointer"
                           >
                             {eventGroup.event_name}
                             <ExternalLink className="h-4 w-4" />
