@@ -18,11 +18,29 @@ function MemberResults() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data, error } = await supabase.from('v_member_results').select('*').limit(100000)
+        let allResults = []
+        let from = 0
+        let to = 999
+        let hasMore = true
         
-        if (error) throw error
+        while (hasMore) {
+          const { data, error } = await supabase.from('v_member_results').select('*').range(from, to)
+          
+          if (error) throw error
+          
+          if (data && data.length > 0) {
+            allResults = [...allResults, ...data]
+            from = to + 1
+            to = from + 999
+            if (data.length < 1000) {
+              hasMore = false
+            }
+          } else {
+            hasMore = false
+          }
+        }
         
-        setResults(data || [])
+        setResults(allResults)
         setLoading(false)
       } catch (err) {
         console.error('Failed to load member results:', err)
