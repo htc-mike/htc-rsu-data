@@ -120,7 +120,8 @@ function Finance() {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return 'N/A'
-    return new Date(dateStr).toLocaleDateString('en-US', {
+    const [year, month, day] = dateStr.split('T')[0].split('-').map(Number)
+    return new Date(year, month - 1, day).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
@@ -129,7 +130,8 @@ function Finance() {
 
   const formatMonthYear = (dateStr) => {
     if (!dateStr) return ''
-    return new Date(dateStr).toLocaleDateString('en-US', {
+    const [year, month] = dateStr.split('T')[0].split('-').map(Number)
+    return new Date(year, month - 1, 1).toLocaleDateString('en-US', {
       year: '2-digit',
       month: 'short'
     })
@@ -150,7 +152,7 @@ function Finance() {
     const targetMonth = monthMap[monthName]
     
     return detailData.filter(d => {
-      const dMonth = new Date(d.trans_date).getMonth()
+      const dMonth = Number(d.trans_date.split('T')[0].split('-')[1]) - 1
       return dMonth === targetMonth && d.trans_year === year
     })
   }
