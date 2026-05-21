@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, Filter, Calendar, Trophy, Users, MapPin, Ruler, ChevronDown, ChevronRight, ExternalLink } from 'lucide-react'
+import { Search, Filter, Calendar, Trophy, Users, MapPin, Ruler, ChevronDown, ChevronRight } from 'lucide-react'
 import { supabase } from '../supabaseClient.js'
 
 function MemberResults() {
@@ -329,25 +329,29 @@ function MemberResults() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Trophy className="h-5 w-5 text-purple-400" />
-                        <span 
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleEventClick(eventKey)
-                          }}
-                          className="text-white font-bold hover:text-blue-400 transition-colors cursor-pointer"
-                        >
-                          {eventGroup.event_name}
-                        </span>
-                        {eventGroup.race_url && (
+                        {eventGroup.race_url ? (
                           <a
                             href={eventGroup.race_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-white hover:text-blue-400 transition-colors cursor-pointer"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleEventClick(eventKey)
+                            }}
+                            className="text-white font-bold hover:text-blue-400 transition-colors cursor-pointer"
                           >
-                            <ExternalLink className="h-4 w-4" />
+                            {eventGroup.event_name}
                           </a>
+                        ) : (
+                          <span 
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleEventClick(eventKey)
+                            }}
+                            className="text-white font-bold hover:text-blue-400 transition-colors cursor-pointer"
+                          >
+                            {eventGroup.event_name}
+                          </span>
                         )}
                       </div>
                       <div className="flex items-center gap-2">
