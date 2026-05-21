@@ -205,26 +205,23 @@ function Memberships() {
       const monthLabel = monthDate.toLocaleString('default', { month: 'short' })
       const monthKey = monthDate.toISOString().slice(0, 7) // YYYY-MM format
       
-      // Find matching summary record for this month - more flexible matching
+      // Find matching summary record for this month using date field
       const monthSummary = membershipSummary.find(s => {
-        if (!s) return false
-        // Try different possible field names for month/date
-        const summaryDate = s.month || s.date || s.month_date || s.summary_month
-        if (!summaryDate) return false
-        
-        const summaryMonth = summaryDate.toString().slice(0, 7) // Extract YYYY-MM
+        if (!s || !s.date) return false
+        const summaryMonth = s.date.slice(0, 7) // Extract YYYY-MM from YYYY-MM-DD
         return summaryMonth === monthKey
       })
       
       // Debug: log matching
       console.log(`Month ${monthKey} (${monthLabel}):`, monthSummary)
       
-      // Handle NULL values - treat all as 0, try different field names
-      const newCount = monthSummary ? (monthSummary.new ?? monthSummary.New ?? monthSummary.NEW ?? 0) : 0
-      const lapsedCount = monthSummary ? (monthSummary.lapsed ?? monthSummary.Lapsed ?? monthSummary.LAPSED ?? 0) : 0
-      const expiredCount = monthSummary ? (monthSummary.expired ?? monthSummary.Expired ?? monthSummary.EXPIRED ?? 0) : 0
-      const renewalCount = monthSummary ? (monthSummary.renewal ?? monthSummary.Renewal ?? monthSummary.RENEWAL ?? 0) : 0
-      const advancedCount = monthSummary ? (monthSummary.advanced ?? monthSummary.Advanced ?? monthSummary.ADVANCED ?? 0) : 0
+      // Handle NULL values - treat all as 0
+      // Using the actual field names from the view
+      const newCount = monthSummary ? (monthSummary.new ?? monthSummary.new_members ?? 0) : 0
+      const lapsedCount = monthSummary ? (monthSummary.lapsed ?? monthSummary.lapsed_members ?? 0) : 0
+      const expiredCount = monthSummary ? (monthSummary.expired ?? monthSummary.expired_members ?? 0) : 0
+      const renewalCount = monthSummary ? (monthSummary.renewed ?? monthSummary.renewal ?? 0) : 0
+      const advancedCount = monthSummary ? (monthSummary.advanced ?? monthSummary.advanced_renewal ?? 0) : 0
       
       memberChangesData.push({
         month: monthLabel,
