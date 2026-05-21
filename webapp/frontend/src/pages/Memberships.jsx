@@ -217,11 +217,11 @@ function Memberships() {
       
       // Handle NULL values - treat all as 0
       // Using the actual field names from the view
-      const newCount = monthSummary ? (monthSummary.new ?? monthSummary.new_members ?? 0) : 0
-      const lapsedCount = monthSummary ? (monthSummary.lapsed ?? monthSummary.lapsed_members ?? 0) : 0
-      const expiredCount = monthSummary ? (monthSummary.expired ?? monthSummary.expired_members ?? 0) : 0
-      const renewalCount = monthSummary ? (monthSummary.renewed ?? monthSummary.renewal ?? 0) : 0
-      const advancedCount = monthSummary ? (monthSummary.advanced ?? monthSummary.advanced_renewal ?? 0) : 0
+      const newCount = monthSummary ? (monthSummary.new ?? 0) : 0
+      const lapsedCount = monthSummary ? (monthSummary.lapsed ?? 0) : 0
+      const expiredCount = monthSummary ? (monthSummary.expired ?? 0) : 0
+      const renewalCount = monthSummary ? (monthSummary.renewed ?? 0) : 0
+      const advancedCount = monthSummary ? (monthSummary.advanced ?? 0) : 0
       
       memberChangesData.push({
         month: monthLabel,
