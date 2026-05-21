@@ -340,14 +340,14 @@ function Memberships() {
                 {renderSortableHeader('membership_sub_status', 'Sub-Status')}
               </tr>
             </thead>
-            <tbody key={`${subStatusFilter}-${searchTerm}`} className="divide-y divide-[#334155]">
+            <tbody key={`${subStatusFilter}-${searchTerm}-${sortConfig.key}-${sortConfig.direction}`} className="divide-y divide-[#334155]">
               {filteredMemberships.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="px-6 py-12 text-center text-[#94A3B8]">No memberships found</td>
                 </tr>
               ) : (
                 filteredMemberships.map((member, index) => (
-                  <tr key={`${subStatusFilter}-${member.membership_id || index}`} className="hover:bg-[#334155] transition-colors">
+                  <tr key={`${subStatusFilter}-${sortConfig.key}-${sortConfig.direction}-${member.membership_id || index}`} className="hover:bg-[#334155] transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
                       {member.membership_id || 'N/A'}
                     </td>
