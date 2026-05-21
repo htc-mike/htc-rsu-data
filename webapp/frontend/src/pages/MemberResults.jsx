@@ -84,6 +84,7 @@ function MemberResults() {
         event_date: result.event_date,
         event_name: result.event_name,
         location: result.location,
+        url: result.url,
         races: {}
       }
     }
@@ -327,15 +328,30 @@ function MemberResults() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Trophy className="h-5 w-5 text-purple-400" />
-                        <span 
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleEventClick(eventKey)
-                          }}
-                          className="text-white font-bold hover:text-blue-400 transition-colors cursor-pointer"
-                        >
-                          {eventGroup.event_name}
-                        </span>
+                        {eventGroup.url ? (
+                          <a
+                            href={eventGroup.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleEventClick(eventKey)
+                            }}
+                            className="text-white font-bold hover:text-blue-400 transition-colors cursor-pointer"
+                          >
+                            {eventGroup.event_name}
+                          </a>
+                        ) : (
+                          <span 
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleEventClick(eventKey)
+                            }}
+                            className="text-white font-bold hover:text-blue-400 transition-colors cursor-pointer"
+                          >
+                            {eventGroup.event_name}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         <MapPin className="h-5 w-5 text-red-400" />
