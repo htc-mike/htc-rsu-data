@@ -225,13 +225,13 @@ function Home() {
           <p className="text-[#94A3B8]">{formatCurrency(currentBalance)} balance</p>
         </Link>
 
-        <Link to="/analytics" className="card p-6 hover:scale-105 transition-transform cursor-pointer animate-fade-in" style={{ animationDelay: '0.4s' }}>
+        <Link to="/member-results" className="card p-6 hover:scale-105 transition-transform cursor-pointer animate-fade-in" style={{ animationDelay: '0.4s' }}>
           <div className="flex items-center justify-between mb-4">
-            <BarChart3 className="h-8 w-8 text-orange-400" />
+            <Medal className="h-8 w-8 text-orange-400" />
             <ArrowRight className="h-5 w-5 text-[#94A3B8]" />
           </div>
-          <h2 className="text-3xl font-bold text-white mb-2">Analytics</h2>
-          <p className="text-[#94A3B8]">{resultsData.length} data points</p>
+          <h2 className="text-3xl font-bold text-white mb-2">Member Results</h2>
+          <p className="text-[#94A3B8]">View race results</p>
         </Link>
       </div>
 
