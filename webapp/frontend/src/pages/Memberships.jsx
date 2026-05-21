@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts'
+import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, ComposedChart, Area, AreaChart } from 'recharts'
 import { Users, DollarSign, Calendar, Search, Filter, Download, List } from 'lucide-react'
 import { supabase } from '../supabaseClient.js'
 
@@ -222,11 +222,13 @@ function Memberships() {
       const expiredCount = monthSummary.expired ?? 0
       const renewalCount = monthSummary.renewed ?? 0
       const advancedCount = monthSummary.advanced ?? 0
+      const endingTotal = monthSummary.ending_total ?? 0
       
       // Only add if there's actual data (not all zeros)
-      if (newCount > 0 || lapsedCount > 0 || expiredCount > 0 || renewalCount > 0 || advancedCount > 0) {
+      if (newCount > 0 || lapsedCount > 0 || expiredCount > 0 || renewalCount > 0 || advancedCount > 0 || endingTotal > 0) {
         memberChangesData.push({
           month: monthLabel,
+          'Ending Total': endingTotal,
           'New-Lapsed': newCount + lapsedCount,
           'Expired': expiredCount,
           'Renewal': renewalCount + advancedCount
@@ -289,6 +291,27 @@ function Memberships() {
       {/* Charts */}
       <div className="flex gap-6 mb-8 animate-slide-in">
         <div className="card p-6 flex-1">
+          <h2 className="text-2xl font-bold text-white mb-4">Member Changes</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <ComposedChart data={stats.memberChangesData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+              <XAxis dataKey="month" stroke="#94A3B8" fill="#94A3B8" />
+              <YAxis yAxisId="left" stroke="#94A3B8" fill="#94A3B8" />
+              <YAxis yAxisId="right" orientation="right" stroke="#94A3B8" fill="#94A3B8" />
+              <Tooltip 
+                contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '8px' }}
+                itemStyle={{ color: '#F8FAFC' }}
+              />
+              <Legend />
+              <Bar yAxisId="left" dataKey="Ending Total" fill="#6366F1" opacity={0.3} />
+              <Line yAxisId="right" type="monotone" dataKey="New-Lapsed" stroke="#3B82F6" strokeWidth={2} dot={{ r: 4 }} />
+              <Line yAxisId="right" type="monotone" dataKey="Expired" stroke="#EF4444" strokeWidth={2} dot={{ r: 4 }} />
+              <Line yAxisId="right" type="monotone" dataKey="Renewal" stroke="#10B981" strokeWidth={2} dot={{ r: 4 }} />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="card p-6 flex-1">
           <h2 className="text-2xl font-bold text-white mb-4">Members by Division</h2>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -312,25 +335,6 @@ function Memberships() {
               />
               <Legend />
             </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="card p-6 flex-1">
-          <h2 className="text-2xl font-bold text-white mb-4">Member Changes</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={stats.memberChangesData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="month" stroke="#94A3B8" fill="#94A3B8" />
-              <YAxis stroke="#94A3B8" fill="#94A3B8" />
-              <Tooltip 
-                contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '8px' }}
-                itemStyle={{ color: '#F8FAFC' }}
-              />
-              <Legend />
-              <Line type="monotone" dataKey="New-Lapsed" stroke="#3B82F6" strokeWidth={2} dot={{ r: 4 }} />
-              <Line type="monotone" dataKey="Expired" stroke="#EF4444" strokeWidth={2} dot={{ r: 4 }} />
-              <Line type="monotone" dataKey="Renewal" stroke="#10B981" strokeWidth={2} dot={{ r: 4 }} />
-            </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
