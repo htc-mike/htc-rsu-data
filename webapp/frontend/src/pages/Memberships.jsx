@@ -157,16 +157,18 @@ function Memberships() {
     const totalRevenue = memberships.reduce((sum, m) => sum + (m.amount_paid || 0), 0)
     const avgCost = totalMembers > 0 ? totalRevenue / totalMembers : 0
     
-    // Members by sub-status
-    const subStatusCounts = {}
+    // Members by division
+    const divisionCounts = {}
     memberships.forEach(m => {
-      const subStatus = getSubStatus(m)
-      subStatusCounts[subStatus] = (subStatusCounts[subStatus] || 0) + 1
+      if (getSubStatus(m) === 'Active') {
+        const division = m.division?.toString().trim() || 'Unknown'
+        divisionCounts[division] = (divisionCounts[division] || 0) + 1
+      }
     })
     
-    const subStatusData = Object.keys(subStatusCounts).map(subStatus => ({
-      name: subStatus,
-      value: subStatusCounts[subStatus]
+    const divisionData = Object.keys(divisionCounts).map(division => ({
+      name: division,
+      value: divisionCounts[division]
     }))
     
     // Members by year (based on membership_start)
@@ -187,7 +189,7 @@ function Memberships() {
       totalMembers,
       totalRevenue,
       avgCost,
-      subStatusData,
+      divisionData,
       yearData
     }
   }
@@ -238,11 +240,11 @@ function Memberships() {
       {/* Charts */}
       <div className="flex gap-6 mb-8 animate-slide-in">
         <div className="card p-6 flex-1">
-          <h2 className="text-2xl font-bold text-white mb-4">Members by Sub-Status</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">Members by Division</h2>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
-                data={stats.subStatusData}
+                data={stats.divisionData}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
@@ -251,7 +253,7 @@ function Memberships() {
                 fill="#8884d8"
                 dataKey="value"
               >
-                {stats.subStatusData.map((entry, index) => (
+                {stats.divisionData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
