@@ -36,7 +36,8 @@ SELECT
     res.city,
     res.state,
     m.membership_status,
-    e.start_time
+    e.start_time,
+    r.url AS race_url
     
 FROM htc.results res
 JOIN htc.events e ON e.event_id = res.event_id
@@ -46,4 +47,4 @@ LEFT JOIN htc.memberships m ON m.email = res.email
     AND m.membership_start <= e.start_time 
     AND (m.membership_end IS NULL OR m.membership_end >= e.start_time)
 
-ORDER BY e.start_time DESC, r.name, res.place;
+ORDER BY e.start_time ASC, r.name, res.place;
