@@ -38,7 +38,11 @@ function MemberResults() {
   const uniqueRaces = [...new Set(results.map(r => r.race))].sort()
   const uniqueLocations = [...new Set(results.map(r => r.location))].sort()
   const uniqueDistances = [...new Set(results.map(r => r.distance))].sort()
-  const uniqueYears = [...new Set(results.map(r => r.event_date ? r.event_date.split('-')[0] : null))].filter(Boolean).sort().reverse()
+  const uniqueYears = [...new Set(results.map(r => {
+    if (!r.event_date) return null
+    const date = new Date(r.event_date)
+    return isNaN(date.getTime()) ? null : date.getFullYear().toString()
+  }))].filter(Boolean).sort().reverse()
 
   // Filter results
   const filteredResults = results.filter(result => {
@@ -52,7 +56,7 @@ function MemberResults() {
     const matchesRace = raceFilter === 'all' || result.race === raceFilter
     const matchesLocation = locationFilter === 'all' || result.location === locationFilter
     const matchesDistance = distanceFilter === 'all' || result.distance === distanceFilter
-    const matchesYear = yearFilter === 'all' || (result.event_date && result.event_date.startsWith(yearFilter))
+    const matchesYear = yearFilter === 'all' || (result.event_date && new Date(result.event_date).getFullYear().toString() === yearFilter)
     
     return matchesSearch && matchesEvent && matchesRace && matchesLocation && matchesDistance && matchesYear
   })
