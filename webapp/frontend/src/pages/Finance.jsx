@@ -292,7 +292,7 @@ function Finance() {
                 ✕
               </button>
             </div>
-            <div className="overflow-x-auto p-6">
+            <div className="overflow-x-auto overflow-y-auto p-6 max-h-[60vh]">
               <table className="w-full">
                 <thead className="bg-[#0F172A]">
                   <tr>
