@@ -10,6 +10,7 @@ function Memberships() {
   const [searchTerm, setSearchTerm] = useState('')
   const [subStatusFilter, setSubStatusFilter] = useState('Active')
   const [membershipSubStatuses, setMembershipSubStatuses] = useState([])
+  const [sortConfig, setSortConfig] = useState({ key: 'full_name', direction: 'asc' })
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,8 +58,50 @@ function Memberships() {
       filtered = filtered.filter(m => getSubStatus(m) === subStatusFilter)
     }
     
-    return filtered
+    return [...filtered].sort((a, b) => {
+      let aValue = sortConfig.key === 'membership_sub_status' ? getSubStatus(a) : a[sortConfig.key]
+      let bValue = sortConfig.key === 'membership_sub_status' ? getSubStatus(b) : b[sortConfig.key]
+
+      if (sortConfig.key === 'membership_end') {
+        aValue = aValue ? new Date(aValue).getTime() : 0
+        bValue = bValue ? new Date(bValue).getTime() : 0
+      } else if (sortConfig.key === 'age' || sortConfig.key === 'membership_id') {
+        aValue = Number(aValue) || 0
+        bValue = Number(bValue) || 0
+      } else {
+        aValue = aValue?.toString().toLowerCase() || ''
+        bValue = bValue?.toString().toLowerCase() || ''
+      }
+
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1
+      return 0
+    })
   })()
+
+  const handleSort = (key) => {
+    setSortConfig(current => ({
+      key,
+      direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
+    }))
+  }
+
+  const getSortIndicator = (key) => {
+    if (sortConfig.key !== key) return ''
+    return sortConfig.direction === 'asc' ? ' ↑' : ' ↓'
+  }
+
+  const renderSortableHeader = (key, label) => (
+    <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">
+      <button
+        type="button"
+        onClick={() => handleSort(key)}
+        className="uppercase tracking-wider hover:text-white transition-colors"
+      >
+        {label}{getSortIndicator(key)}
+      </button>
+    </th>
+  )
 
   const formatCurrency = (amount) => {
     if (!amount) return '$0.00'
@@ -287,14 +330,14 @@ function Memberships() {
           <table className="w-full">
             <thead className="bg-[#0F172A]">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Membership ID</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Full Name</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Age</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Gender</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">City/State</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Membership End</th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Sub-Status</th>
+                {renderSortableHeader('membership_id', 'Membership ID')}
+                {renderSortableHeader('full_name', 'Full Name')}
+                {renderSortableHeader('email', 'Email')}
+                {renderSortableHeader('age', 'Age')}
+                {renderSortableHeader('gender', 'Gender')}
+                {renderSortableHeader('city_state', 'City/State')}
+                {renderSortableHeader('membership_end', 'Membership End')}
+                {renderSortableHeader('membership_sub_status', 'Sub-Status')}
               </tr>
             </thead>
             <tbody key={`${subStatusFilter}-${searchTerm}`} className="divide-y divide-[#334155]">
