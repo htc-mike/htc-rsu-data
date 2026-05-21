@@ -13,7 +13,7 @@ function MemberResults() {
   const [distanceFilter, setDistanceFilter] = useState('all')
   const [yearFilter, setYearFilter] = useState(new Date().getFullYear().toString())
   const [expandedGroups, setExpandedGroups] = useState({})
-  const [expandAll, setExpandAll] = useState(false)
+  const [expandAll, setExpandAll] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,6 +41,29 @@ function MemberResults() {
         }
         
         setResults(allResults)
+        
+        // Expand all groups by default
+        if (allResults.length > 0) {
+          const grouped = allResults.reduce((acc, result) => {
+            const eventKey = `${result.event_date}-${result.event_name}-${result.location}`
+            if (!acc[eventKey]) {
+              acc[eventKey] = { races: {} }
+            }
+            const raceKey = `${result.race}-${result.distance}`
+            acc[eventKey].races[raceKey] = true
+            return acc
+          }, {})
+          
+          const allKeys = {}
+          Object.keys(grouped).forEach(eventKey => {
+            allKeys[eventKey] = true
+            Object.keys(grouped[eventKey].races).forEach(raceKey => {
+              allKeys[`${eventKey}-${raceKey}`] = true
+            })
+          })
+          setExpandedGroups(allKeys)
+        }
+        
         setLoading(false)
       } catch (err) {
         console.error('Failed to load member results:', err)
