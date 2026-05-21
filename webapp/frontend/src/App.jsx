@@ -7,7 +7,7 @@ import Races from './pages/Races'
 import RaceDetail from './pages/RaceDetail'
 import Registrations from './pages/Registrations'
 import Results from './pages/Results'
-import Analytics from './pages/Analytics'
+import MemberResults from './pages/MemberResults'
 import Memberships from './pages/Memberships'
 import Finance from './pages/Finance'
 import { supabase } from './supabaseClient'
@@ -73,7 +73,7 @@ function AppContent() {
             <Route path="/races/:raceId" element={<ProtectedRoute><RaceDetail /></ProtectedRoute>} />
             <Route path="/registrations" element={<ProtectedRoute><Registrations /></ProtectedRoute>} />
             <Route path="/results" element={<ProtectedRoute><Results /></ProtectedRoute>} />
-            <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+            <Route path="/member-results" element={<ProtectedRoute><MemberResults /></ProtectedRoute>} />
             <Route path="/memberships" element={<ProtectedRoute><Memberships /></ProtectedRoute>} />
             <Route path="/finance" element={<ProtectedRoute><Finance /></ProtectedRoute>} />
           </Routes>
