@@ -329,23 +329,25 @@ function MemberResults() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Trophy className="h-5 w-5 text-purple-400" />
-                        {eventGroup.race_url ? (
+                        <span 
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleEventClick(eventKey)
+                          }}
+                          className="text-white font-bold hover:text-blue-400 transition-colors cursor-pointer"
+                        >
+                          {eventGroup.event_name}
+                        </span>
+                        {eventGroup.race_url && (
                           <a
                             href={eventGroup.race_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              e.preventDefault()
-                              handleEventClick(eventKey)
-                            }}
-                            className="text-white font-bold hover:text-blue-400 transition-colors flex items-center gap-1 cursor-pointer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-white hover:text-blue-400 transition-colors cursor-pointer"
                           >
-                            {eventGroup.event_name}
                             <ExternalLink className="h-4 w-4" />
                           </a>
-                        ) : (
-                          <span className="text-white font-bold">{eventGroup.event_name}</span>
                         )}
                       </div>
                       <div className="flex items-center gap-2">
