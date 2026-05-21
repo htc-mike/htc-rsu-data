@@ -149,9 +149,26 @@ function Memberships() {
 
   // Calculate stats for graphs
   const calculateStats = () => {
-    const totalMembers = memberships.length
-    const totalRevenue = memberships.reduce((sum, m) => sum + (m.amount_paid || 0), 0)
-    const avgCost = totalMembers > 0 ? totalRevenue / totalMembers : 0
+    const currentYear = new Date().getFullYear()
+    
+    // Active Members: count where membership_status = 'Active'
+    const activeMembers = memberships.filter(m => m.membership_status === 'Active').length
+    
+    // Total Revenue: aggregate amount_paid of primary_member where membership_start is in current year
+    const totalRevenue = memberships
+      .filter(m => m.primary_member && m.membership_start)
+      .filter(m => {
+        const startYear = Number(m.membership_start.split('T')[0].split('-')[0])
+        return startYear === currentYear
+      })
+      .reduce((sum, m) => sum + (m.amount_paid || 0), 0)
+    
+    // Total Memberships: distinct count of membership_id for active members
+    const totalMemberships = new Set(
+      memberships
+        .filter(m => m.membership_status === 'Active')
+        .map(m => m.membership_id)
+    ).size
     
     // Members by division
     const divisionCounts = {}
@@ -182,9 +199,9 @@ function Memberships() {
     }))
     
     return {
-      totalMembers,
+      activeMembers,
       totalRevenue,
-      avgCost,
+      totalMemberships,
       divisionData,
       yearData
     }
@@ -207,8 +224,8 @@ function Memberships() {
         <div className="card p-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-[#94A3B8]">Total Members</p>
-              <p className="text-3xl font-bold text-white">{stats.totalMembers}</p>
+              <p className="text-sm text-[#94A3B8]">Active Members</p>
+              <p className="text-3xl font-bold text-white">{stats.activeMembers}</p>
             </div>
             <Users className="h-8 w-8 text-blue-400" />
           </div>
@@ -225,8 +242,8 @@ function Memberships() {
         <div className="card p-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-[#94A3B8]">Avg Cost/Member</p>
-              <p className="text-3xl font-bold text-white">{formatCurrency(stats.avgCost)}</p>
+              <p className="text-sm text-[#94A3B8]">Total Memberships</p>
+              <p className="text-3xl font-bold text-white">{stats.totalMemberships}</p>
             </div>
             <Calendar className="h-8 w-8 text-orange-400" />
           </div>
