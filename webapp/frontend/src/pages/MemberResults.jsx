@@ -131,22 +131,21 @@ function MemberResults() {
   }
 
   const handleEventClick = (eventKey) => {
-    const isEventExpanded = expandedGroups[eventKey]
-    setExpandedGroups(prev => ({
-      ...prev,
-      [eventKey]: !isEventExpanded
-    }))
-    
-    if (!isEventExpanded) {
-      const eventGroup = groupedResults[eventKey]
-      if (eventGroup && eventGroup.races) {
-        const newExpanded = { ...expandedGroups }
-        Object.keys(eventGroup.races).forEach(raceKey => {
-          newExpanded[`${eventKey}-${raceKey}`] = true
-        })
-        setExpandedGroups(newExpanded)
+    setExpandedGroups(prev => {
+      const isEventExpanded = prev[eventKey]
+      const newExpanded = { ...prev, [eventKey]: !isEventExpanded }
+      
+      if (!isEventExpanded) {
+        const eventGroup = groupedResults[eventKey]
+        if (eventGroup && eventGroup.races) {
+          Object.keys(eventGroup.races).forEach(raceKey => {
+            newExpanded[`${eventKey}-${raceKey}`] = true
+          })
+        }
       }
-    }
+      
+      return newExpanded
+    })
   }
 
   const formatTime = (time) => {
