@@ -1,5 +1,5 @@
 -- htc.v_member_results source
--- View to show member race results with event and race information
+-- View to show race results with event and race information
 
 drop VIEW htc.v_member_results;
 CREATE OR REPLACE VIEW htc.v_member_results
@@ -18,8 +18,8 @@ SELECT
     
     -- Detail: Individual Results
     res.place AS race_place,
-    COALESCE(m.full_name, res.first_name || ' ' || res.last_name) AS name,
-    COALESCE(m.division, res.gender || ' ' || res.age::text) AS division,
+    res.first_name || ' ' || res.last_name AS name,
+    res.gender || ' ' || res.age::text AS division,
     res.division_place,
     res.chip_time AS time,
     res.pace,
@@ -29,22 +29,16 @@ SELECT
     e.event_id,
     r.race_id,
     res.result_id,
-    m.membership_id,
-    m.email,
+    res.email,
     res.gender,
     res.age,
     res.city,
     res.state,
-    m.membership_status,
     e.start_time,
     r.url AS race_url
     
 FROM htc.results res
 JOIN htc.events e ON e.event_id = res.event_id
 JOIN htc.races r ON r.race_id = e.race_id
-LEFT JOIN htc.memberships m ON m.email = res.email 
-    AND m.membership_status = 'Active'
-    AND m.membership_start <= e.start_time 
-    AND (m.membership_end IS NULL OR m.membership_end >= e.start_time)
 
 ORDER BY e.start_time ASC, r.name, res.place;
