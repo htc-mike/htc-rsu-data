@@ -209,11 +209,18 @@ function Memberships() {
         return summaryMonth === monthKey
       })
       
+      // Handle NULL values - treat all as 0
+      const newCount = monthSummary ? (monthSummary.new ?? 0) : 0
+      const lapsedCount = monthSummary ? (monthSummary.lapsed ?? 0) : 0
+      const expiredCount = monthSummary ? (monthSummary.expired ?? 0) : 0
+      const renewalCount = monthSummary ? (monthSummary.renewal ?? 0) : 0
+      const advancedCount = monthSummary ? (monthSummary.advanced ?? 0) : 0
+      
       memberChangesData.push({
         month: monthYear,
-        'New-Lapsed': monthSummary ? (monthSummary.new || 0) + (monthSummary.lapsed || 0) : 0,
-        'Expired': monthSummary ? (monthSummary.expired || 0) : 0,
-        'Renewal': monthSummary ? (monthSummary.renewal || 0) + (monthSummary.advanced || 0) : 0
+        'New-Lapsed': newCount + lapsedCount,
+        'Expired': expiredCount,
+        'Renewal': renewalCount + advancedCount
       })
     }
     
