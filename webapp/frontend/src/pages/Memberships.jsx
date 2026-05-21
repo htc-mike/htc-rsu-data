@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { Users, DollarSign, Calendar, Search, Filter, Download } from 'lucide-react'
+import { Users, DollarSign, Calendar, Search, Filter, Download, List } from 'lucide-react'
 import { supabase } from '../supabaseClient.js'
 
 function Memberships() {
@@ -233,7 +233,7 @@ function Memberships() {
         <div className="card p-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-[#94A3B8]">Total Revenue</p>
+              <p className="text-sm text-[#94A3B8]">Total Revenue ({new Date().getFullYear()})</p>
               <p className="text-3xl font-bold text-white">{formatCurrency(stats.totalRevenue)}</p>
             </div>
             <DollarSign className="h-8 w-8 text-green-400" />
@@ -245,7 +245,7 @@ function Memberships() {
               <p className="text-sm text-[#94A3B8]">Total Memberships</p>
               <p className="text-3xl font-bold text-white">{stats.totalMemberships}</p>
             </div>
-            <Calendar className="h-8 w-8 text-orange-400" />
+            <List className="h-8 w-8 text-orange-400" />
           </div>
         </div>
       </div>
