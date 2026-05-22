@@ -106,8 +106,8 @@ function MemberResults() {
 
   // Calculate KPIs
   const calculateKPIs = () => {
-    const uniqueEvents = new Set(filteredResults.map(r => r.event_name))
-    const uniqueRaces = new Set(filteredResults.map(r => r.race))
+    const uniqueEvents = new Set(filteredResults.map(r => `${r.event_date}|${r.event_name}`))
+    const uniqueRaces = new Set(filteredResults.map(r => `${r.event_date}|${r.event_name}|${r.race}`))
     const uniqueMembers = new Set(filteredResults.map(r => r.name))
     const uniqueDistances = new Set(filteredResults.map(r => r.distance))
     const uniqueLocations = new Set(filteredResults.map(r => r.location))
