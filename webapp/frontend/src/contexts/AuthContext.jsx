@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'https://data.hartfordtrackclub.com/auth/callback.html',
+        redirectTo: `${window.location.origin}/auth/callback.html`,
         skipBrowserRedirect: false
       }
     })

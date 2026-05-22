@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Search, Filter, Calendar, Trophy, Users, MapPin, Ruler, ChevronDown, ChevronRight } from 'lucide-react'
 import { supabase } from '../supabaseClient.js'
-import SportShoeIcon from '../sport-shoe.svg?react'
-import SquareSquareIcon from '../square-square.svg?react'
 
 function MemberResults() {
   const [results, setResults] = useState([])
@@ -374,7 +372,7 @@ function MemberResults() {
                         <span className="text-white font-medium">{eventGroup.event_date}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <SquareSquareIcon className="h-5 w-5 text-purple-400" />
+                        <Trophy className="h-5 w-5 text-purple-400" />
                         {eventGroup.url ? (
                           <a
                             href={eventGroup.url}
@@ -424,7 +422,7 @@ function MemberResults() {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-6">
                                 <div className="flex items-center gap-2">
-                                  <SportShoeIcon className="h-5 w-5 text-yellow-400" />
+                                  <Trophy className="h-5 w-5 text-yellow-400" />
                                   <span className="text-white font-bold">{raceGroup.race}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
