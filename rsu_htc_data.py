@@ -17,12 +17,12 @@ TBL_REGISTRATIONS = 'htc.registrations'
 TBL_MEMBERS = 'htc.memberships'
 TBL_RESULTS = 'htc.results'
 
-REFRESH_EVENTS = True
+REFRESH_EVENTS = False
 REFRESH_REGISTRATIONS = False
 REFRESH_DONATIONS = False
 REFRESH_MEMBERS = False
 REFRESH_RESULTS = False
-RACE_ID = False
+RACE_ID = None
 
 def main():
 
