@@ -9,7 +9,9 @@ function Memberships() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [subStatusFilter, setSubStatusFilter] = useState('Active')
+  const [statusFilter, setStatusFilter] = useState('Active')
+  const [membershipStatuses, setMembershipStatuses] = useState([])
+  const [subStatusFilter, setSubStatusFilter] = useState('all')
   const [membershipSubStatuses, setMembershipSubStatuses] = useState([])
   const [sortConfig, setSortConfig] = useState({ key: 'full_name', direction: 'asc' })
   const [refreshTimestamp, setRefreshTimestamp] = useState(null)
@@ -29,6 +31,10 @@ function Memberships() {
         }, null)
         setRefreshTimestamp(maxTs)
         
+        // Extract unique membership statuses
+        const statuses = [...new Set((membershipData || []).map(m => m.membership_status?.toString().trim()).filter(Boolean))].sort()
+        setMembershipStatuses(statuses)
+
         // Extract unique membership sub-statuses
         const subStatuses = [...new Set((membershipData || []).map(m => getSubStatus(m)))].sort()
         setMembershipSubStatuses(subStatuses)
@@ -55,6 +61,11 @@ function Memberships() {
     return subStatus || 'Unknown'
   }
 
+  const availableSubStatuses = (() => {
+    const pool = statusFilter === 'all' ? memberships : memberships.filter(m => m.membership_status?.toString().trim() === statusFilter)
+    return [...new Set(pool.map(m => getSubStatus(m)))].sort()
+  })()
+
   const filteredMemberships = (() => {
     let filtered = memberships
     
@@ -68,6 +79,11 @@ function Memberships() {
       )
     }
     
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(m => m.membership_status?.toString().trim() === statusFilter)
+    }
+
     // Apply sub-status filter
     if (subStatusFilter !== 'all') {
       filtered = filtered.filter(m => getSubStatus(m) === subStatusFilter)
@@ -390,12 +406,25 @@ function Memberships() {
           <div className="relative">
             <Filter className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-[#94A3B8]" />
             <select
+              value={statusFilter}
+              onChange={(e) => { setStatusFilter(e.target.value); setSubStatusFilter('all') }}
+              className="pl-10 pr-4 py-2 bg-[#1E293B] border border-[#334155] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none cursor-pointer"
+            >
+              <option value="all">All Statuses</option>
+              {membershipStatuses.map(status => (
+                <option key={status} value={status}>{status}</option>
+              ))}
+            </select>
+          </div>
+          <div className="relative">
+            <Filter className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-[#94A3B8]" />
+            <select
               value={subStatusFilter}
               onChange={(e) => setSubStatusFilter(e.target.value)}
               className="pl-10 pr-4 py-2 bg-[#1E293B] border border-[#334155] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none cursor-pointer"
             >
               <option value="all">All Sub-Statuses</option>
-              {membershipSubStatuses.map(subStatus => (
+              {availableSubStatuses.map(subStatus => (
                 <option key={subStatus} value={subStatus}>{subStatus}</option>
               ))}
             </select>
@@ -422,14 +451,14 @@ function Memberships() {
                 {renderSortableHeader('membership_sub_status', 'Sub-Status')}
               </tr>
             </thead>
-            <tbody key={`${subStatusFilter}-${searchTerm}-${sortConfig.key}-${sortConfig.direction}`} className="divide-y divide-[#334155]">
+            <tbody key={`${statusFilter}-${subStatusFilter}-${searchTerm}-${sortConfig.key}-${sortConfig.direction}`} className="divide-y divide-[#334155]">
               {filteredMemberships.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="px-6 py-12 text-center text-[#94A3B8]">No memberships found</td>
                 </tr>
               ) : (
                 filteredMemberships.map((member, index) => (
-                  <tr key={`${subStatusFilter}-${sortConfig.key}-${sortConfig.direction}-${member.membership_id || index}`} className="hover:bg-[#334155] transition-colors">
+                  <tr key={`${statusFilter}-${subStatusFilter}-${sortConfig.key}-${sortConfig.direction}-${member.membership_id || index}`} className="hover:bg-[#334155] transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
                       {member.membership_id || 'N/A'}
                     </td>
