@@ -23,7 +23,7 @@ function Home() {
         setRacesData(races || [])
 
         // Fetch memberships data (level distribution and active status)
-        const { data: memberships } = await supabase.from('v_memberships').select('club_membership_level_name, membership_end').limit(1000)
+        const { data: memberships } = await supabase.from('v_memberships').select('club_membership_level_name, membership_end, membership_status')
         setMembershipsData(memberships || [])
 
         // Fetch membership summary data
@@ -109,15 +109,9 @@ function Home() {
     return new Intl.NumberFormat('en-US').format(num)
   }
 
-  // Calculate active members (membership_end is in future or null)
+  // Calculate active members (matching Memberships page: membership_status === 'Active')
   const getActiveMemberCount = () => {
-    const now = new Date()
-    return membershipsData.filter(m => {
-      if (!m.membership_end) return true // No end date means active
-      const [year, month, day] = m.membership_end.split('T')[0].split('-').map(Number)
-      const endDate = new Date(year, month - 1, day)
-      return endDate >= now
-    }).length
+    return membershipsData.filter(m => m.membership_status === 'Active').length
   }
 
   // Calculate membership level distribution for pie chart
