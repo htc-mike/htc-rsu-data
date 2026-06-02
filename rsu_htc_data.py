@@ -43,7 +43,7 @@ def main():
     update_user_donations(rsu, db, refresh = REFRESH_DONATIONS, race_id = RACE_ID)
     update_user_members(rsu, db, refresh=REFRESH_MEMBERS)
 
-def update_race_events(rsu, db, race_id = None):
+def update_race_events(rsu: RSU_Data, db: PostgresDB, race_id = None):
     if race_id is not None:
         sql = f"""
                 select race_id, name from htc.races where race_id = {race_id}
@@ -67,7 +67,7 @@ def update_race_events(rsu, db, race_id = None):
         db.execute(sql)
         db.insert_dict(events, TBL_EVENTS)
 
-def update_user_registrations(rsu, db, refresh = False, race_id = None):
+def update_user_registrations(rsu: RSU_Data, db: PostgresDB, refresh = False, race_id = None):
     sql = f"""
             select distinct
                 r.race_id,
@@ -107,7 +107,7 @@ def update_user_registrations(rsu, db, refresh = False, race_id = None):
                 db.execute(sql)
                 db.insert_dict(registrations, TBL_REGISTRATIONS)
 
-def update_user_donations(rsu, db, refresh = False, race_id = None):
+def update_user_donations(rsu: RSU_Data, db: PostgresDB, refresh = False, race_id = None):
     sql = f"""
             select
                 r.race_id,
@@ -152,7 +152,7 @@ def update_user_donations(rsu, db, refresh = False, race_id = None):
                     db.insert_dict(users, TBL_USERS)
                     db.insert_dict(donations, TBL_DONATIONS)
 
-def update_user_members(rsu, db, refresh = False):
+def update_user_members(rsu: RSU_Data, db: PostgresDB, refresh = False):
 
     users, members = rsu.get_members()
 
@@ -164,7 +164,7 @@ def update_user_members(rsu, db, refresh = False):
 
     print(f"Members: {len(members)}")
 
-def update_results(rsu,db, refresh = False):
+def update_results(rsu: RSU_Data, db: PostgresDB, refresh = False):
     
     sql = f"""
             select distinct
