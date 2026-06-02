@@ -124,6 +124,17 @@ function Memberships() {
     return dateStr.split('T')[0]
   }
 
+  const formatAddress = (member) => {
+    const street = member.street || ''
+    const cityState = member.city_state
+      ? member.city_state.replace(/,\s*(\S+)\s*$/, (_, st) => ', ' + st.toUpperCase())
+      : ''
+    const zip = member.zip_code || ''
+    const cityStateParts = [cityState, zip].filter(Boolean).join(' ')
+    const parts = [street, cityStateParts].filter(Boolean)
+    return parts.join(', ') || 'N/A'
+  }
+
   const exportToCsv = () => {
     const columns = [
       ['Membership ID', 'membership_id'],
@@ -131,7 +142,7 @@ function Memberships() {
       ['Email', 'email'],
       ['Age', 'age'],
       ['Gender', 'gender'],
-      ['City/State', 'city_state'],
+      ['Address', 'address'],
       ['Membership End', 'membership_end'],
       ['Sub-Status', 'membership_sub_status']
     ]
@@ -142,6 +153,7 @@ function Memberships() {
     const rows = filteredMemberships.map(member => columns.map(([label, key]) => {
       if (key === 'membership_end') return escapeCsvValue(formatDate(member.membership_end))
       if (key === 'membership_sub_status') return escapeCsvValue(getSubStatus(member))
+      if (key === 'address') return escapeCsvValue(formatAddress(member))
       return escapeCsvValue(member[key])
     }).join(','))
     const csv = [columns.map(([label]) => escapeCsvValue(label)).join(','), ...rows].join('\n')
@@ -392,7 +404,7 @@ function Memberships() {
                 {renderSortableHeader('email', 'Email')}
                 {renderSortableHeader('age', 'Age')}
                 {renderSortableHeader('gender', 'Gender')}
-                {renderSortableHeader('city_state', 'City/State')}
+                <th className="px-6 py-3 text-left text-xs font-bold text-[#94A3B8] uppercase tracking-wider">Address</th>
                 {renderSortableHeader('membership_end', 'Membership End')}
                 {renderSortableHeader('membership_sub_status', 'Sub-Status')}
               </tr>
@@ -421,7 +433,7 @@ function Memberships() {
                       {member.gender || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[#94A3B8]">
-                      {member.city_state || 'N/A'}
+                      {formatAddress(member)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[#94A3B8]">
                       {formatDate(member.membership_end)}
