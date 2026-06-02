@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, ComposedChart, Area, AreaChart } from 'recharts'
-import { Users, DollarSign, Calendar, Search, Filter, Download, List } from 'lucide-react'
+import { Users, DollarSign, Calendar, Search, Filter, Download, List, Clock } from 'lucide-react'
 import { supabase } from '../supabaseClient.js'
 
 function Memberships() {
@@ -12,6 +12,7 @@ function Memberships() {
   const [subStatusFilter, setSubStatusFilter] = useState('Active')
   const [membershipSubStatuses, setMembershipSubStatuses] = useState([])
   const [sortConfig, setSortConfig] = useState({ key: 'full_name', direction: 'asc' })
+  const [refreshTimestamp, setRefreshTimestamp] = useState(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -21,6 +22,12 @@ function Memberships() {
         if (membershipError) throw membershipError
         
         setMemberships(membershipData || [])
+
+        const maxTs = (membershipData || []).reduce((max, m) => {
+          if (!m.refresh_timestamp) return max
+          return !max || m.refresh_timestamp > max ? m.refresh_timestamp : max
+        }, null)
+        setRefreshTimestamp(maxTs)
         
         // Extract unique membership sub-statuses
         const subStatuses = [...new Set((membershipData || []).map(m => getSubStatus(m)))].sort()
@@ -353,7 +360,13 @@ function Memberships() {
 
       {/* Search and Filter */}
       <div className="card p-6 mb-6 animate-slide-in">
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-between items-center mb-4">
+          {refreshTimestamp ? (
+            <div className="flex items-center gap-2 text-sm text-[#94A3B8]">
+              <Clock className="h-4 w-4" />
+              <span>Last refreshed: <span className="text-white">{new Date(refreshTimestamp).toLocaleString()}</span></span>
+            </div>
+          ) : <div />}
           <button
             type="button"
             onClick={exportToCsv}

@@ -155,14 +155,14 @@ def update_user_donations(rsu, db, refresh = False, race_id = None):
 def update_user_members(rsu, db, refresh = False):
 
     users, members = rsu.get_members()
-    print(f"Members: {len(members)}")
 
     db.insert_dict(users, TBL_USERS)
 
-    if refresh:
-        sql = f'delete from {TBL_MEMBERS}'
-        db.execute(sql)
+    sql = f'delete from {TBL_MEMBERS}'
+    db.execute(sql)
     db.insert_dict(members, TBL_MEMBERS)
+
+    print(f"Members: {len(members)}")
 
 def update_results(rsu,db, refresh = False):
     
