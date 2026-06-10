@@ -1,11 +1,7 @@
 ﻿name: Data Sync
 
 on:
-  schedule:
-    # Run daily at 9:17 AM and 9:17 PM UTC (~5:17 AM and 5:17 PM EDT)
-    # Off-peak times and odd minute avoid GitHub Actions scheduler congestion
-    - cron: '17 9,21 * * *'
-  workflow_dispatch: # Allow manual trigger
+  workflow_dispatch: # Triggered externally via cron-job.org
 
 jobs:
   sync:
