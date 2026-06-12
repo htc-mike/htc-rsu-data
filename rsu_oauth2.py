@@ -377,12 +377,27 @@ class RunSignUpOAuth2:
         """
         Return a valid access token, refreshing automatically when expired.
 
+        If the refresh token has expired or is invalid (``invalid_grant``),
+        the full Authorization Code flow is re-run automatically so the user
+        can re-authorize via browser.
+
         Raises:
             ValueError:  If no refresh token is available and the token is expired.
-            OAuth2Error: If the refresh request fails.
+            OAuth2Error: If the refresh request fails for a reason other than an
+                         expired/invalid refresh token.
         """
         if self.is_token_expired():
-            self.refresh_access_token()
+            try:
+                self.refresh_access_token()
+            except OAuth2Error as exc:
+                if exc.error == "invalid_grant":
+                    print(
+                        "\nRefresh token is expired or invalid. "
+                        "Re-running the full authorization flow...\n"
+                    )
+                    self.run_initial_auth_flow()
+                else:
+                    raise
         return self.access_token
 
     def get_auth_headers(self) -> Dict[str, str]:
